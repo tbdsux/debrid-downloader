@@ -1,6 +1,6 @@
 {
 	"name": "debrid-downloader",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"private": true,
 	"description": "Desktop app for downloading torrents, magnets and links through debrid services",
 	"license": "MIT",

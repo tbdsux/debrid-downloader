@@ -5,7 +5,7 @@ export default {
 		name: "Debrid Downloader",
 		identifier: "com.werklabs.debriddownloader",
 		// Keep in sync with package.json "version".
-		version: "0.1.0",
+		version: "0.1.1",
 	},
 	build: {
 		mainProcess: "cottontail",
