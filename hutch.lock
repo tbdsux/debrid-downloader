@@ -38,7 +38,7 @@
         "@vitejs/plugin-react": "^4.3.4",
         "concurrently": "^9.1.0",
         "tailwindcss": "^4.1.0",
-        "typescript": "^5.7.2",
+        "typescript": "~6.0.3",
         "vite": "^6.0.3",
       },
     },
@@ -962,7 +962,7 @@
 
     "type-is/content-type": ["content-type@2.1.0", "", {}, ""],
 
-    "typescript": ["typescript@5.9.3", "https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz", {"bin": {"tsc": "./bin/tsc", "tsserver": "./bin/tsserver"}}, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
+    "typescript": ["typescript@6.0.3", "https://registry.npmjs.org/typescript/-/typescript-6.0.3.tgz", {"bin": {"tsc": "bin/tsc", "tsserver": "bin/tsserver"}}, "sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw=="],
 
     "undici": ["undici@7.29.0", "", {}, ""],
 

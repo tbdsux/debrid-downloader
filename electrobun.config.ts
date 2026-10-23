@@ -35,4 +35,10 @@ export default {
 			bundleCEF: false,
 		},
 	},
+	release: {
+		// The updater fetches <baseUrl>/<channel>-<os>-<arch>-update.json; CI attaches those files to each GitHub release.
+		baseUrl: "https://github.com/tbdsux/debrid-downloader/releases/latest/download",
+		// shortcut: full downloads only (no bsdiff patches), patches need the previous release's files at build time; enable once releases are regular.
+		generatePatch: false,
+	},
 } satisfies ElectrobunConfig;

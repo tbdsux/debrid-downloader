@@ -23,6 +23,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+    "types": ["bun", "node", "vite/client"],
     "ignoreDeprecations": "6.0"
   },
   "include": ["src", "electrobun.config.ts", "hutch.config.ts", "vite.config.ts"],

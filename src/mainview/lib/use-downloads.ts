@@ -32,6 +32,20 @@ export function useJobsSync() {
 			}),
 		[],
 	);
+	useEffect(
+		() =>
+			onPush("updateReady", ({ version }) => {
+				toast.info(`Version ${version} is ready`, {
+					description: "Restart to finish updating. Active downloads resume after the restart.",
+					duration: Infinity,
+					action: {
+						label: "Restart",
+						onClick: () => rpc.request.applyUpdate().catch((e) => toast.error(errText(e))),
+					},
+				});
+			}),
+		[],
+	);
 }
 
 export function useJobs() {

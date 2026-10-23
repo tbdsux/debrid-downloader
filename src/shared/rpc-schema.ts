@@ -330,6 +330,8 @@ export interface AppRpcSchema extends ElectrobunRPCSchema {
 				params: { accountId: string; torrentIds: string[] };
 				response: void;
 			};
+			// restarts the app into the downloaded update (after updateReady)
+			applyUpdate: { params: undefined; response: void };
 		};
 		messages: {};
 	};
@@ -340,6 +342,7 @@ export interface AppRpcSchema extends ElectrobunRPCSchema {
 			authFlowResult: AuthFlowResult;
 			settingsChanged: PublicSettings;
 			notify: { kind: "success" | "error" | "info"; title: string; description?: string };
+			updateReady: { version: string };
 		};
 	};
 }

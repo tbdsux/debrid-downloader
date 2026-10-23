@@ -34,6 +34,7 @@ export const rpc = Electroview.defineRPC<AppRpcSchema>({
 			authFlowResult: (p) => emit("authFlowResult", p),
 			settingsChanged: (p) => emit("settingsChanged", p),
 			notify: (p) => emit("notify", p),
+			updateReady: (p) => emit("updateReady", p),
 		},
 	},
 });

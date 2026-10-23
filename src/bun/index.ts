@@ -155,6 +155,10 @@ const rpc = defineElectrobunRPC<AppRpcSchema, "bun">("bun", {
 				manager.addCloudTorrent(accountId, torrentId, name, fileIds, dir),
 			cloudDownloadItems: ({ accountId, items, dir }) => manager.addCloudItems(accountId, items, dir),
 			cloudDelete: ({ accountId, torrentIds }) => cloud.remove(accountId, torrentIds),
+			applyUpdate: async () => {
+				manager.flush();
+				await Updater.applyUpdate();
+			},
 		},
 		messages: {},
 	},
@@ -198,3 +202,15 @@ void new BrowserWindow({
 	},
 	rpc,
 });
+
+// Background update: check once on launch, download silently, then let the user pick when to restart.
+async function checkForUpdate() {
+	if ((await Updater.localInfo.channel()) === "dev") return;
+	const info = await Updater.checkForUpdate();
+	if (info.error) return console.error(`[update] ${info.error}`);
+	if (!info.updateAvailable) return;
+	if (!info.updateReady) await Updater.downloadUpdate();
+	if (Updater.updateInfo().updateReady) rpc.send.updateReady({ version: info.version });
+	else console.error(`[update] download failed: ${Updater.updateInfo().error}`);
+}
+void checkForUpdate().catch((e) => console.error("[update]", e));

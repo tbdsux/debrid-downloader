@@ -45,6 +45,15 @@ The output goes to `artifacts/`:
 | `*.app.tar.zst` | compressed app, used by the auto-updater |
 | `*-update.json` | update manifest for the channel |
 
+Installed apps check `releases/latest/download` on GitHub at launch, download a newer stable build in the background, and offer a restart to finish updating.
+
+> [!WARNING]
+> **macOS builds are not signed or notarized.** macOS blocks the app on first launch with "Debrid Downloader is damaged and can't be opened" or "cannot verify the developer". Once you trust the download, clear the quarantine flag:
+>
+> ```bash
+> xattr -cr "/Applications/Debrid Downloader.app"
+> ```
+
 ### CI
 
 `.github/workflows/build.yml` builds macOS, Linux and Windows on every push and pull request (canary channel) and uploads the result as workflow artifacts.
