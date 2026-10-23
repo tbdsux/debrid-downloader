@@ -26,6 +26,10 @@ jobs:
       - name: Install dependencies
         run: hutch install
 
+      - run: hutch run lint
+
+      - run: hutch run fmt:check
+
       - uses: oven-sh/setup-bun@v2
 
       - run: bun test

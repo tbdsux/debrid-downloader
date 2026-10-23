@@ -96,7 +96,9 @@ export function FilesTab({
 							<Checkbox
 								checked={allSel}
 								indeterminate={selected.size > 0 && !allSel}
-								onCheckedChange={() => setSelected(allSel ? new Set() : new Set(files.map((f) => f.id)))}
+								onCheckedChange={() =>
+									setSelected(allSel ? new Set() : new Set(files.map((f) => f.id)))
+								}
 								aria-label="Select all files"
 							/>
 						</div>
@@ -116,7 +118,10 @@ export function FilesTab({
 								<div
 									key={f.id}
 									onDoubleClick={() => setFolderId(f.id)}
-									className={cn(GRID, "h-9 border-b border-border/60 text-[13px] hover:bg-accent/60")}
+									className={cn(
+										GRID,
+										"h-9 border-b border-border/60 text-[13px] hover:bg-accent/60",
+									)}
 									title="Double-click to open"
 								>
 									<div />
@@ -147,7 +152,9 @@ export function FilesTab({
 											{f.name}
 										</span>
 									</div>
-									<div className="px-2 text-right text-muted-foreground tabular-nums">{bytes(f.bytes)}</div>
+									<div className="px-2 text-right text-muted-foreground tabular-nums">
+										{bytes(f.bytes)}
+									</div>
 									<div className="px-2 text-[12px] text-muted-foreground">{ago(f.addedAt)}</div>
 								</div>
 							))}

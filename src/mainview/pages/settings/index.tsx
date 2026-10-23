@@ -9,8 +9,18 @@ import AdvancedSection from "./advanced";
 
 const SECTIONS = [
 	{ path: "/settings", label: "Accounts", icon: UsersIcon, component: AccountsSection },
-	{ path: "/settings/downloads", label: "Downloads", icon: DownloadIcon, component: DownloadsSection },
-	{ path: "/settings/general", label: "General", icon: SlidersHorizontalIcon, component: GeneralSection },
+	{
+		path: "/settings/downloads",
+		label: "Downloads",
+		icon: DownloadIcon,
+		component: DownloadsSection,
+	},
+	{
+		path: "/settings/general",
+		label: "General",
+		icon: SlidersHorizontalIcon,
+		component: GeneralSection,
+	},
 	{ path: "/settings/advanced", label: "Advanced", icon: WrenchIcon, component: AdvancedSection },
 ] as const;
 
@@ -39,7 +49,10 @@ export default function SettingsPage() {
 						<s.icon />
 						{s.label}
 						{s.label === "Accounts" && invalid && (
-							<span className="ml-auto size-2 rounded-full bg-destructive" title="An account needs attention" />
+							<span
+								className="ml-auto size-2 rounded-full bg-destructive"
+								title="An account needs attention"
+							/>
 						)}
 					</Link>
 				))}

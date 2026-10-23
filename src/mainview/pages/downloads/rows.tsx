@@ -123,7 +123,8 @@ export const JobRow = memo(function JobRow({
 	const KindIcon = KIND_ICON[job.kind];
 	const StatusIcon = STATUS_ICON[job.status];
 	const progress = jobProgress(job);
-	const isRemote = job.status === "remote" || job.status === "submitting" || job.status === "resolving";
+	const isRemote =
+		job.status === "remote" || job.status === "submitting" || job.status === "resolving";
 	const multi = job.tasks.length > 1;
 	const spinning = job.status === "submitting" || job.status === "resolving";
 
@@ -156,7 +157,9 @@ export const JobRow = memo(function JobRow({
 						!multi && "invisible",
 					)}
 				>
-					<ChevronRightIcon className={cn("size-3.5 transition-transform", expanded && "rotate-90")} />
+					<ChevronRightIcon
+						className={cn("size-3.5 transition-transform", expanded && "rotate-90")}
+					/>
 				</button>
 				<KindIcon className="size-4 shrink-0 text-muted-foreground" />
 				<span className="truncate" title={job.name}>
@@ -168,7 +171,9 @@ export const JobRow = memo(function JobRow({
 					</span>
 				)}
 			</div>
-			<div className="px-2 text-right text-muted-foreground tabular-nums">{bytes(job.bytesTotal)}</div>
+			<div className="px-2 text-right text-muted-foreground tabular-nums">
+				{bytes(job.bytesTotal)}
+			</div>
 			<div className="flex items-center gap-2 px-2">
 				<Bar value={progress} tone={STATUS_BAR[job.status]} striped={job.status === "remote"} />
 				<span className="w-9 shrink-0 text-right text-[11.5px] text-muted-foreground tabular-nums">
@@ -180,9 +185,13 @@ export const JobRow = memo(function JobRow({
 				title={job.error ?? undefined}
 			>
 				<StatusIcon className={cn("size-3.5 shrink-0", spinning && "animate-spin")} />
-				<span className="truncate">{job.status === "failed" && job.error ? job.error : statusText(job)}</span>
+				<span className="truncate">
+					{job.status === "failed" && job.error ? job.error : statusText(job)}
+				</span>
 				{job.status === "remote" && job.remote?.seeders != null && (
-					<span className="shrink-0 text-[11px] text-muted-foreground">· {job.remote.seeders} seeds</span>
+					<span className="shrink-0 text-[11px] text-muted-foreground">
+						· {job.remote.seeders} seeds
+					</span>
 				)}
 			</div>
 			<div className="px-2 text-right tabular-nums">
@@ -237,7 +246,11 @@ export const TaskRow = memo(function TaskRow({
 }) {
 	const progress = task.status === "completed" ? 100 : pct(task.bytesDone, task.bytesTotal);
 	const label =
-		task.status === "queued" && task.error ? task.error : task.status === "failed" ? task.error : TASK_LABEL[task.status];
+		task.status === "queued" && task.error
+			? task.error
+			: task.status === "failed"
+				? task.error
+				: TASK_LABEL[task.status];
 	return (
 		<div
 			className={cn(GRID, "group h-[30px] border-b border-border/40 bg-muted/25 text-[12.5px]")}
@@ -258,7 +271,9 @@ export const TaskRow = memo(function TaskRow({
 					</span>
 				)}
 			</div>
-			<div className="px-2 text-right text-muted-foreground tabular-nums">{bytes(task.bytesTotal)}</div>
+			<div className="px-2 text-right text-muted-foreground tabular-nums">
+				{bytes(task.bytesTotal)}
+			</div>
 			<div className="flex items-center gap-2 px-2">
 				<Bar value={progress} tone={TASK_BAR[task.status]} className="h-1" />
 				<span className="w-9 shrink-0 text-right text-[11px] text-muted-foreground tabular-nums">

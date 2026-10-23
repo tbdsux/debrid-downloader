@@ -149,7 +149,11 @@ export async function unrestrict(client: AnyClient, link: string): Promise<Unres
 	const dl = await client.getDirectDownloadLinks(link);
 	const first = dl.content[0];
 	if (!first) throw new DebridError("No files for this link", 200);
-	return { url: first.link, filename: first.path.split("/").pop() || first.path, bytes: first.size };
+	return {
+		url: first.link,
+		filename: first.path.split("/").pop() || first.path,
+		bytes: first.size,
+	};
 }
 
 /**

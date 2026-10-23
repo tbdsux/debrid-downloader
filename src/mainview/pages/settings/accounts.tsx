@@ -65,6 +65,7 @@ import {
 	useReorderAccounts,
 	useSettings,
 	useUpdateAccount,
+	NO_ACCOUNTS,
 } from "@/lib/use-settings";
 import { errText, rpc } from "@/lib/rpc";
 import {
@@ -77,7 +78,7 @@ import { PaneHeader } from "./form";
 
 export default function AccountsSection() {
 	const { data: settings } = useSettings();
-	const accounts = settings?.accounts ?? [];
+	const accounts = settings?.accounts ?? NO_ACCOUNTS;
 	const reorder = useReorderAccounts();
 	const [adding, setAdding] = useState<ProviderId | null | "pick">(null);
 	const [order, setOrder] = useState(accounts.map((a) => a.id));
@@ -143,8 +144,9 @@ export default function AccountsSection() {
 					<KeyRoundIcon className="size-3.5" /> How keys are stored
 				</p>
 				<p className="mt-1">
-					Keys and sign-in tokens are encrypted on this computer (XChaCha20-Poly1305) and only used by the app's
-					background process — this window never sees them. To change a key, replace it.
+					Keys and sign-in tokens are encrypted on this computer (XChaCha20-Poly1305) and only used
+					by the app's background process — this window never sees them. To change a key, replace
+					it.
 				</p>
 			</div>
 
@@ -158,7 +160,9 @@ export default function AccountsSection() {
 }
 
 function AccountRow({ account: a, index }: { account: AccountPublic; index: number }) {
-	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: a.id });
+	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+		id: a.id,
+	});
 	const update = useUpdateAccount();
 	const refresh = useRefreshAccount();
 	const remove = useRemoveAccount();
@@ -188,7 +192,9 @@ function AccountRow({ account: a, index }: { account: AccountPublic; index: numb
 			>
 				<GripVerticalIcon className="size-4" />
 			</button>
-			<span className="w-4 shrink-0 text-center text-xs text-muted-foreground tabular-nums">{index + 1}</span>
+			<span className="w-4 shrink-0 text-center text-xs text-muted-foreground tabular-nums">
+				{index + 1}
+			</span>
 			<ProviderBadge provider={a.provider} className="h-5 min-w-8 text-[11px]" />
 			<div className="min-w-0 flex-1">
 				{renaming ? (
@@ -251,7 +257,10 @@ function AccountRow({ account: a, index }: { account: AccountPublic; index: numb
 					{refresh.isPending ? <Loader2Icon className="animate-spin" /> : <MoreHorizontalIcon />}
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end" className="min-w-48">
-					<DropdownMenuItem disabled={a.isDefault} onClick={() => update.mutate({ id: a.id, isDefault: true })}>
+					<DropdownMenuItem
+						disabled={a.isDefault}
+						onClick={() => update.mutate({ id: a.id, isDefault: true })}
+					>
 						<StarIcon /> Make default
 					</DropdownMenuItem>
 					<DropdownMenuItem
@@ -311,7 +320,8 @@ function ReplaceKeyDialog({
 				<DialogHeader>
 					<DialogTitle>Replace API key</DialogTitle>
 					<DialogDescription>
-						For {PROVIDERS[account.provider].name} · {account.label}. The new key is verified before it's saved.
+						For {PROVIDERS[account.provider].name} · {account.label}. The new key is verified before
+						it's saved.
 					</DialogDescription>
 				</DialogHeader>
 				<Input
@@ -398,7 +408,9 @@ function AddAccountDialog({
 								}}
 								className={cn(
 									"flex flex-col items-start gap-1.5 rounded-lg border p-3 text-left transition-colors",
-									provider === p ? "border-primary bg-primary/5 ring-1 ring-primary" : "hover:bg-accent",
+									provider === p
+										? "border-primary bg-primary/5 ring-1 ring-primary"
+										: "hover:bg-accent",
 								)}
 							>
 								<ProviderBadge provider={p} />

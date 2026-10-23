@@ -1,7 +1,13 @@
 // Cloud ("Debrid Viewer") reads: what's already on a linked account.
 import * as adapter from "./debrid/adapter";
 import { withClient } from "./accounts/clients";
-import type { CloudAccountInfo, CloudFile, CloudFolder, CloudLink, CloudTorrent } from "../shared/rpc-schema";
+import type {
+	CloudAccountInfo,
+	CloudFile,
+	CloudFolder,
+	CloudLink,
+	CloudTorrent,
+} from "../shared/rpc-schema";
 
 export async function accountInfo(accountId: string): Promise<CloudAccountInfo> {
 	const u = await withClient(accountId, (c) => c.getUser());
@@ -39,7 +45,11 @@ export async function torrentFiles(accountId: string, id: string): Promise<Cloud
 		const t = await adapter.getTorrent(c, id);
 		if (t.status !== "downloaded") {
 			// Not finished: show the file list the torrent reports (RD/AD), if any.
-			return (t.files ?? []).map((f) => ({ id: String(f.id), path: f.path.replace(/^\/+/, ""), bytes: f.bytes }));
+			return (t.files ?? []).map((f) => ({
+				id: String(f.id),
+				path: f.path.replace(/^\/+/, ""),
+				bytes: f.bytes,
+			}));
 		}
 		const files = await adapter.listFiles(c, id);
 		return files.map((f) => ({ id: f.key, path: f.path, bytes: f.bytes }));

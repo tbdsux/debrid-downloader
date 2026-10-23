@@ -92,7 +92,9 @@ function StatusBar() {
 			<span className={cn("flex items-center gap-1", down > 0 && "text-foreground")}>
 				<ArrowDownIcon className={cn("size-3.5", down > 0 && "text-primary")} />
 				{speed(down) || "0 B/s"}
-				{limit > 0 && <span className="text-muted-foreground">(limit {bytes(limit * 1024)}/s)</span>}
+				{limit > 0 && (
+					<span className="text-muted-foreground">(limit {bytes(limit * 1024)}/s)</span>
+				)}
 			</span>
 			<span>
 				{active} active · {queued} queued

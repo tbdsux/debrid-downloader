@@ -1,0 +1,19 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": ["typescript", "unicorn", "oxc", "react", "import"],
+	"categories": {
+		"correctness": "error",
+		"suspicious": "warn"
+	},
+	"rules": {
+		"react/react-in-jsx-scope": "off",
+		"import/no-unassigned-import": "off",
+		"react/set-state-in-effect": "off",
+		"react/purity": "off",
+		"react/incompatible-library": "off"
+	},
+	"env": {
+		"browser": true,
+		"node": true
+	}
+}

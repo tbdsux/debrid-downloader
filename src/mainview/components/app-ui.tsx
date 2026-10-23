@@ -46,8 +46,15 @@ export function ProviderBadge({
 	);
 }
 
-export function AccountName({ account, className }: { account?: AccountPublic; className?: string }) {
-	if (!account) return <span className={cn("text-muted-foreground", className)}>Removed account</span>;
+export function AccountName({
+	account,
+	className,
+}: {
+	account?: AccountPublic;
+	className?: string;
+}) {
+	if (!account)
+		return <span className={cn("text-muted-foreground", className)}>Removed account</span>;
 	return (
 		<span className={cn("flex min-w-0 items-center gap-1.5", className)}>
 			<ProviderBadge provider={account.provider} />
@@ -204,6 +211,8 @@ export function SectionTitle({ children, action }: { children: ReactNode; action
 
 export function Kbd({ children }: { children: ReactNode }) {
 	return (
-		<kbd className="rounded border bg-muted px-1 font-mono text-[10px] text-muted-foreground">{children}</kbd>
+		<kbd className="rounded border bg-muted px-1 font-mono text-[10px] text-muted-foreground">
+			{children}
+		</kbd>
 	);
 }

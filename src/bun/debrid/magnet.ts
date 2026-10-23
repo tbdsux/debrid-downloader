@@ -11,7 +11,10 @@ export function parseMagnet(input: string): ParsedMagnet | null {
 	}
 	if (!uri.toLowerCase().startsWith("magnet:?")) return null;
 	const params = new URLSearchParams(uri.slice(8));
-	const xt = params.getAll("xt").map((x) => BTIH.exec(x)).find(Boolean);
+	const xt = params
+		.getAll("xt")
+		.map((x) => BTIH.exec(x))
+		.find(Boolean);
 	if (!xt) return null;
 	const name = params.get("dn")?.trim();
 	return { hash: xt[1].toLowerCase(), name: name || undefined, uri };
@@ -28,7 +31,14 @@ export function isHttpUrl(input: string): boolean {
 
 /** Split a textarea into non-empty, de-duplicated lines. */
 export function splitLines(text: string): string[] {
-	return [...new Set(text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean))];
+	return [
+		...new Set(
+			text
+				.split(/\r?\n/)
+				.map((l) => l.trim())
+				.filter(Boolean),
+		),
+	];
 }
 
 /** Clipboard text → first magnet or http(s) link, else null. */
@@ -56,6 +66,7 @@ export function nameFromUrl(url: string): string {
 /** Strip characters that are invalid in file names on any major OS. */
 export function safeFileName(name: string): string {
 	const cleaned = name
+		// oxlint-disable-next-line no-control-regex -- stripping control chars is the point
 		.replace(/[\\/:*?"<>|\u0000-\u001f]/g, "_")
 		.replace(/^[.\s]+|[.\s]+$/g, "")
 		.slice(0, 200);

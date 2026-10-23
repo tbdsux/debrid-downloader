@@ -47,19 +47,30 @@ export default function AdvancedSection() {
 			</Group>
 
 			<Group title="Data">
-				<Row label="Configuration folder" hint={<span className="font-mono break-all" data-selectable>{s.configDir}</span>}>
+				<Row
+					label="Configuration folder"
+					hint={
+						<span className="font-mono break-all" data-selectable>
+							{s.configDir}
+						</span>
+					}
+				>
 					<Button size="sm" variant="outline" onClick={() => void rpc.request.openConfigFolder()}>
 						<FolderCogIcon /> Open
 					</Button>
 				</Row>
-				<Row label="Reset preferences" hint="Restores download, general and network settings. Accounts are kept.">
+				<Row
+					label="Reset preferences"
+					hint="Restores download, general and network settings. Accounts are kept."
+				>
 					<Button
 						size="sm"
 						variant="destructive"
 						onClick={() =>
 							confirm({
 								title: "Reset preferences?",
-								description: "Download folder, concurrency, theme and other options go back to defaults. Your accounts stay linked.",
+								description:
+									"Download folder, concurrency, theme and other options go back to defaults. Your accounts stay linked.",
 								confirm: "Reset",
 								destructive: true,
 								onConfirm: () => reset.mutate(),

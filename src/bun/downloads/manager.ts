@@ -8,7 +8,15 @@
 // - remote:     the debrid service is fetching it (uncached); polled per account
 // - resolving:  list the finished torrent's files → one FileTask each
 // - files:      local transfers; the job's public status derives from its tasks
-import { existsSync, mkdirSync, readFileSync, rmSync, statSync, statfsSync, writeFileSync } from "node:fs";
+import {
+	existsSync,
+	mkdirSync,
+	readFileSync,
+	rmSync,
+	statSync,
+	statfsSync,
+	writeFileSync,
+} from "node:fs";
 import { basename, dirname, extname, join } from "node:path";
 import PQueue from "p-queue";
 import { Utils } from "electrobun/main";
@@ -197,7 +205,12 @@ export class DownloadManager {
 		return jobs.map(toPublicJob);
 	}
 
-	async addMagnets(inputs: string[], accountId: string, dir?: string, start?: boolean): Promise<JobPublic[]> {
+	async addMagnets(
+		inputs: string[],
+		accountId: string,
+		dir?: string,
+		start?: boolean,
+	): Promise<JobPublic[]> {
 		const jobs: Job[] = [];
 		const bad: string[] = [];
 		for (const input of inputs) {
@@ -211,12 +224,21 @@ export class DownloadManager {
 			jobs.push(job);
 		}
 		if (bad.length) {
-			this.hooks.toast("error", `${bad.length} line(s) aren't valid magnet links`, bad[0]?.slice(0, 80));
+			this.hooks.toast(
+				"error",
+				`${bad.length} line(s) aren't valid magnet links`,
+				bad[0]?.slice(0, 80),
+			);
 		}
 		return this.register(jobs);
 	}
 
-	async addLinks(inputs: string[], accountId: string, dir?: string, start?: boolean): Promise<JobPublic[]> {
+	async addLinks(
+		inputs: string[],
+		accountId: string,
+		dir?: string,
+		start?: boolean,
+	): Promise<JobPublic[]> {
 		const jobs: Job[] = [];
 		for (const link of inputs) {
 			try {
@@ -240,7 +262,13 @@ export class DownloadManager {
 	): Promise<JobPublic[]> {
 		const jobs: Job[] = [];
 		for (const f of files) {
-			const job = await this.baseJob("torrent", accountId, f.name.replace(/\.torrent$/i, ""), dir, start);
+			const job = await this.baseJob(
+				"torrent",
+				accountId,
+				f.name.replace(/\.torrent$/i, ""),
+				dir,
+				start,
+			);
 			const path = join(torrentsDir(), `${job.id}.torrent`);
 			writeFileSync(path, Buffer.from(f.base64, "base64"));
 			job.source = path;
@@ -277,7 +305,9 @@ export class DownloadManager {
 			const job = await this.baseJob("cloud", accountId, item.name, dir, true);
 			job.stage = "files";
 			job.targetDir = job.dir;
-			job.tasks = [this.newTask(item.id, safeFileName(item.name), item.name, item.bytes, "", true, item.id)];
+			job.tasks = [
+				this.newTask(item.id, safeFileName(item.name), item.name, item.bytes, "", true, item.id),
+			];
 			jobs.push(job);
 		}
 		return this.register(jobs);
@@ -511,7 +541,9 @@ export class DownloadManager {
 				const files = job.torrentId
 					? await adapter.listFiles(c, job.torrentId)
 					: await adapter.resolveLink(c, job.source!);
-				const hit = files.find((f) => f.key === task.key) ?? files.find((f) => basename(f.path) === task.name);
+				const hit =
+					files.find((f) => f.key === task.key) ??
+					files.find((f) => basename(f.path) === task.name);
 				if (!hit) throw new Error("File is no longer available on the account");
 				return hit.link;
 			}
@@ -527,7 +559,8 @@ export class DownloadManager {
 
 	private claimedPaths(): Set<string> {
 		const s = new Set<string>();
-		for (const j of this.jobs.values()) for (const t of j.tasks) if (t.finalPath) s.add(t.finalPath);
+		for (const j of this.jobs.values())
+			for (const t of j.tasks) if (t.finalPath) s.add(t.finalPath);
 		return s;
 	}
 
@@ -640,11 +673,14 @@ export class DownloadManager {
 			}
 			this.hooks.toast("success", "Download complete", job.name);
 			if (this.general.deleteAfter && job.torrentId) {
-				void withClient(job.accountId, (c) => adapter.deleteTorrent(c, job.torrentId!)).catch((err) =>
-					console.warn("[deleteAfter]", errorMessage(err)),
+				void withClient(job.accountId, (c) => adapter.deleteTorrent(c, job.torrentId!)).catch(
+					(err) => console.warn("[deleteAfter]", errorMessage(err)),
 				);
 			}
-		} else if (status === "failed" && job.tasks.every((t) => t.status !== "queued" && t.status !== "active")) {
+		} else if (
+			status === "failed" &&
+			job.tasks.every((t) => t.status !== "queued" && t.status !== "active")
+		) {
 			this.hooks.toast("error", `Failed: ${job.name}`, toPublicJob(job).error);
 		}
 	}
@@ -693,7 +729,11 @@ export class DownloadManager {
 			for (const t of job.tasks) {
 				if (!t.finalPath) continue;
 				rmSync(`${t.finalPath}.part`, { force: true });
-				if (t.status === "completed" && existsSync(t.finalPath) && !t.error?.startsWith("Skipped")) {
+				if (
+					t.status === "completed" &&
+					existsSync(t.finalPath) &&
+					!t.error?.startsWith("Skipped")
+				) {
 					try {
 						Utils.moveToTrash(t.finalPath);
 					} catch {
@@ -748,7 +788,11 @@ export class DownloadManager {
 						try {
 							await withClient(job.accountId, (c) => adapter.deleteTorrent(c, job.torrentId!));
 						} catch (err) {
-							this.hooks.toast("error", "Could not remove from the debrid account", errorMessage(err));
+							this.hooks.toast(
+								"error",
+								"Could not remove from the debrid account",
+								errorMessage(err),
+							);
 						}
 					}
 					await this.removeJob(job, false);
@@ -770,6 +814,7 @@ export class DownloadManager {
 	}
 
 	async clearCompleted(): Promise<void> {
+		// oxlint-disable-next-line unicorn/no-useless-spread -- snapshot: removeJob deletes from this.jobs mid-loop
 		for (const job of [...this.jobs.values()]) {
 			if (deriveStatus(job) === "completed") await this.removeJob(job, false);
 		}

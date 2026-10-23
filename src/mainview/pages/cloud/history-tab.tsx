@@ -77,7 +77,9 @@ export function HistoryTab({
 						<Checkbox
 							checked={allSel}
 							indeterminate={selected.size > 0 && !allSel}
-							onCheckedChange={() => setSelected(allSel ? new Set() : new Set(items.map((l) => l.id)))}
+							onCheckedChange={() =>
+								setSelected(allSel ? new Set() : new Set(items.map((l) => l.id)))
+							}
 							aria-label="Select all"
 						/>
 					</div>
@@ -91,7 +93,9 @@ export function HistoryTab({
 						<Loader2Icon className="size-4 animate-spin" /> Loading history…
 					</div>
 				) : items.length === 0 ? (
-					<CloudEmpty text={search ? "Nothing matches the filter." : "No download history on this account."} />
+					<CloudEmpty
+						text={search ? "Nothing matches the filter." : "No download history on this account."}
+					/>
 				) : (
 					items.map((l) => (
 						<div
@@ -113,7 +117,9 @@ export function HistoryTab({
 								</span>
 							</div>
 							<div className="truncate px-2 text-[12px] text-muted-foreground">{l.host}</div>
-							<div className="px-2 text-right text-muted-foreground tabular-nums">{bytes(l.bytes)}</div>
+							<div className="px-2 text-right text-muted-foreground tabular-nums">
+								{bytes(l.bytes)}
+							</div>
 							<div className="px-2 text-[12px] text-muted-foreground">{ago(l.addedAt)}</div>
 						</div>
 					))

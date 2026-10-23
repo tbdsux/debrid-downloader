@@ -2,7 +2,13 @@ import "./net-tuning"; // must run before any network call
 import Electrobun, { BrowserWindow, Updater, Utils, defineElectrobunRPC } from "electrobun/main";
 import { readFileSync } from "node:fs";
 import { basename } from "node:path";
-import { loadSettings, onSettingsChanged, resetPreferences, toPublic, updateSettings } from "./settings";
+import {
+	loadSettings,
+	onSettingsChanged,
+	resetPreferences,
+	toPublic,
+	updateSettings,
+} from "./settings";
 import * as accounts from "./accounts/store";
 import { cancelAuthFlow, startAuthFlow } from "./accounts/auth-flows";
 import { DownloadManager } from "./downloads/manager";
@@ -153,7 +159,8 @@ const rpc = defineElectrobunRPC<AppRpcSchema, "bun">("bun", {
 			cloudFolder: ({ accountId, folderId }) => cloud.folder(accountId, folderId ?? null),
 			cloudDownload: ({ accountId, torrentId, name, fileIds, dir }) =>
 				manager.addCloudTorrent(accountId, torrentId, name, fileIds, dir),
-			cloudDownloadItems: ({ accountId, items, dir }) => manager.addCloudItems(accountId, items, dir),
+			cloudDownloadItems: ({ accountId, items, dir }) =>
+				manager.addCloudItems(accountId, items, dir),
 			cloudDelete: ({ accountId, torrentIds }) => cloud.remove(accountId, torrentIds),
 			applyUpdate: async () => {
 				manager.flush();

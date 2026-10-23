@@ -24,7 +24,8 @@ const STATUS: Record<string, { label: string; tone: string }> = {
 	compressing: { label: "Compressing", tone: "text-info" },
 	uploading: { label: "Uploading", tone: "text-info" },
 };
-const statusOf = (s: string) => STATUS[s] ?? { label: s.replace(/_/g, " "), tone: "text-destructive" };
+const statusOf = (s: string) =>
+	STATUS[s] ?? { label: s.replace(/_/g, " "), tone: "text-destructive" };
 const isFinal = (s: string) => s === "downloaded" || !(s in STATUS);
 
 type Row = { type: "torrent"; t: CloudTorrent } | { type: "files"; t: CloudTorrent };
@@ -70,7 +71,11 @@ export function TorrentsTab({
 					const out = [];
 					for (const t of chosen) {
 						out.push(
-							...(await rpc.request.cloudDownload({ accountId: account.id, torrentId: t.id, name: t.name })),
+							...(await rpc.request.cloudDownload({
+								accountId: account.id,
+								torrentId: t.id,
+								name: t.name,
+							})),
 						);
 					}
 					setSelected(new Set());
@@ -78,7 +83,10 @@ export function TorrentsTab({
 				}),
 			remove: async () => {
 				try {
-					await rpc.request.cloudDelete({ accountId: account.id, torrentIds: chosen.map((t) => t.id) });
+					await rpc.request.cloudDelete({
+						accountId: account.id,
+						torrentIds: chosen.map((t) => t.id),
+					});
 					toast.success(`Deleted ${chosen.length} from ${account.label}`);
 					setSelected(new Set());
 					void qc.invalidateQueries({ queryKey: ["cloud", account.id, "torrents"] });
@@ -131,7 +139,9 @@ export function TorrentsTab({
 						<Checkbox
 							checked={allSel}
 							indeterminate={selected.size > 0 && !allSel}
-							onCheckedChange={() => setSelected(allSel ? new Set() : new Set(items.map((t) => t.id)))}
+							onCheckedChange={() =>
+								setSelected(allSel ? new Set() : new Set(items.map((t) => t.id)))
+							}
 							aria-label="Select all"
 						/>
 					</div>
@@ -145,7 +155,9 @@ export function TorrentsTab({
 						<Loader2Icon className="size-4 animate-spin" /> Loading torrents…
 					</div>
 				) : items.length === 0 ? (
-					<CloudEmpty text={search ? "No torrents match the filter." : "No torrents on this account."} />
+					<CloudEmpty
+						text={search ? "No torrents match the filter." : "No torrents on this account."}
+					/>
 				) : (
 					<div style={{ height: v.getTotalSize(), position: "relative" }}>
 						{v.getVirtualItems().map((vi) => {
@@ -202,7 +214,9 @@ function TorrentRow({
 	const done = t.status === "downloaded";
 	return (
 		<div
-			onMouseDown={(e) => e.button === 0 && !(e.target as HTMLElement).closest("button") && onToggle()}
+			onMouseDown={(e) =>
+				e.button === 0 && !(e.target as HTMLElement).closest("button") && onToggle()
+			}
 			onDoubleClick={onExpand}
 			className={cn(
 				GRID,
@@ -220,7 +234,9 @@ function TorrentRow({
 					onClick={onExpand}
 					className="flex size-4 shrink-0 items-center justify-center rounded text-muted-foreground hover:text-foreground"
 				>
-					<ChevronRightIcon className={cn("size-3.5 transition-transform", expanded && "rotate-90")} />
+					<ChevronRightIcon
+						className={cn("size-3.5 transition-transform", expanded && "rotate-90")}
+					/>
 				</button>
 				<span className="truncate" title={t.name}>
 					{t.name}
@@ -232,7 +248,12 @@ function TorrentRow({
 					<span className={st.tone}>{st.label}</span>
 				) : (
 					<>
-						<Bar value={t.progress} tone="bg-warning" className="w-16 shrink-0" striped={t.status === "downloading"} />
+						<Bar
+							value={t.progress}
+							tone="bg-warning"
+							className="w-16 shrink-0"
+							striped={t.status === "downloading"}
+						/>
 						<span className={cn("truncate text-[12px]", st.tone)}>
 							{st.label}
 							{t.status === "downloading" && ` ${Math.floor(t.progress)}%`}
@@ -292,7 +313,9 @@ function FilesPanel({ account, t }: { account: AccountPublic; t: CloudTorrent })
 								<span className="min-w-0 flex-1 truncate" title={f.path}>
 									{f.path}
 								</span>
-								<span className="shrink-0 text-muted-foreground tabular-nums">{bytes(f.bytes)}</span>
+								<span className="shrink-0 text-muted-foreground tabular-nums">
+									{bytes(f.bytes)}
+								</span>
 							</label>
 						))}
 					</div>

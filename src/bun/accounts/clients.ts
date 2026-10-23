@@ -32,7 +32,10 @@ function tokenOf(secret: AccountSecret): string {
 	return secret.kind === "apikey" ? secret.apiKey : secret.accessToken;
 }
 
-async function refreshIfNeeded(account: AccountMeta, secret: AccountSecret): Promise<AccountSecret> {
+async function refreshIfNeeded(
+	account: AccountMeta,
+	secret: AccountSecret,
+): Promise<AccountSecret> {
 	if (secret.kind !== "oauth" || secret.expiresAt - Date.now() > 60_000) return secret;
 	if (account.provider !== "real-debrid") return secret; // only RD issues refresh tokens here
 	const token = await RealDebrid.refreshToken({
@@ -55,7 +58,9 @@ async function refreshIfNeeded(account: AccountMeta, secret: AccountSecret): Pro
 export class AccountError extends Error {}
 
 /** Resolve a usable client for an account (refreshing OAuth tokens). */
-export async function clientFor(accountId: string): Promise<{ client: AnyClient; account: AccountMeta }> {
+export async function clientFor(
+	accountId: string,
+): Promise<{ client: AnyClient; account: AccountMeta }> {
 	const s = await loadSettings();
 	const account = s.accounts.find((a) => a.id === accountId);
 	const secret = s.secrets[accountId];
@@ -91,7 +96,9 @@ const AUTH_CODES = new Set([
 export function isAuthError(err: unknown): boolean {
 	return (
 		err instanceof DebridError &&
-		(err.status === 401 || err.status === 403 || (err.code !== undefined && AUTH_CODES.has(err.code)))
+		(err.status === 401 ||
+			err.status === 403 ||
+			(err.code !== undefined && AUTH_CODES.has(err.code)))
 	);
 }
 
@@ -115,7 +122,15 @@ export async function withClient<T>(
 	}
 }
 
-const NETWORK_CODES = new Set(["ETIMEDOUT", "ECONNREFUSED", "ECONNRESET", "ENOTFOUND", "EAI_AGAIN", "ENETUNREACH", "EHOSTUNREACH"]);
+const NETWORK_CODES = new Set([
+	"ETIMEDOUT",
+	"ECONNREFUSED",
+	"ECONNRESET",
+	"ENOTFOUND",
+	"EAI_AGAIN",
+	"ENETUNREACH",
+	"EHOSTUNREACH",
+]);
 
 /** Connection-level failure (never reached the service), as opposed to an API error. */
 export function isNetworkError(err: unknown): boolean {
@@ -125,7 +140,8 @@ export function isNetworkError(err: unknown): boolean {
 }
 
 export function errorMessage(err: unknown): string {
-	if (isNetworkError(err)) return "Couldn't reach the service — check your internet connection and try again";
+	if (isNetworkError(err))
+		return "Couldn't reach the service — check your internet connection and try again";
 	if (err instanceof DebridError) {
 		return err.code ? `${err.message} (${err.code})` : err.message;
 	}

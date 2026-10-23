@@ -26,6 +26,8 @@ hutch run install    # install dependencies from the lockfile
 hutch run dev:hmr    # run the app with Vite hot reload (recommended)
 hutch run dev        # run the app from bundled assets, no hot reload
 bun test             # unit tests for main-process logic (src/bun/**/*.test.ts)
+hutch run lint       # oxlint (hutch run lint:fix to apply safe fixes)
+hutch run fmt        # format with oxfmt (CI runs hutch run fmt:check)
 ```
 
 To add a dependency, edit `package.json` and run `hutch install`. Don't use `npm`, `yarn` or `pnpm`.
@@ -39,11 +41,11 @@ hutch run build          # stable channel
 
 The output goes to `artifacts/`:
 
-| File | Purpose |
-|---|---|
-| `*.dmg` | macOS installer to hand out to users |
+| File            | Purpose                                  |
+| --------------- | ---------------------------------------- |
+| `*.dmg`         | macOS installer to hand out to users     |
 | `*.app.tar.zst` | compressed app, used by the auto-updater |
-| `*-update.json` | update manifest for the channel |
+| `*-update.json` | update manifest for the channel          |
 
 Installed apps check `releases/latest/download` on GitHub at launch, download a newer stable build in the background, and offer a restart to finish updating.
 

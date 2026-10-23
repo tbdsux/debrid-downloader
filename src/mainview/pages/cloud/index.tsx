@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/empty";
 import { AccountSelect, ToolButton, ToolSep } from "@/components/app-ui";
 import { useConfirm } from "@/components/confirm";
-import { useSettings } from "@/lib/use-settings";
+import { useSettings, NO_ACCOUNTS } from "@/lib/use-settings";
 import { errText, rpc } from "@/lib/rpc";
 import { PROVIDERS, type AccountPublic } from "../../../shared/rpc-schema";
 import { TorrentsTab } from "./torrents-tab";
@@ -53,7 +53,7 @@ function writeLast(id: string) {
 
 export default function CloudPage() {
 	const { data: settings } = useSettings();
-	const accounts = settings?.accounts ?? [];
+	const accounts = settings?.accounts ?? NO_ACCOUNTS;
 	const [accountId, setAccountId] = useState<string | null>(null);
 	const [tab, setTab] = useState<CloudTab>("torrents");
 	const [search, setSearch] = useState("");
@@ -96,7 +96,8 @@ export default function CloudPage() {
 					</EmptyMedia>
 					<EmptyTitle>No debrid accounts</EmptyTitle>
 					<EmptyDescription>
-						Link a Real-Debrid, AllDebrid or Premiumize account to browse what's already in your cloud.
+						Link a Real-Debrid, AllDebrid or Premiumize account to browse what's already in your
+						cloud.
 					</EmptyDescription>
 				</EmptyHeader>
 				<EmptyContent>
@@ -189,7 +190,9 @@ export default function CloudPage() {
 				{tab === "history" && (
 					<HistoryTab key={account.id} account={account} search={search} onApi={setApi} />
 				)}
-				{tab === "files" && <FilesTab key={account.id} account={account} search={search} onApi={setApi} />}
+				{tab === "files" && (
+					<FilesTab key={account.id} account={account} search={search} onApi={setApi} />
+				)}
 			</div>
 			{confirmNode}
 		</div>
@@ -214,7 +217,10 @@ function AccountInfo({ account }: { account: AccountPublic }) {
 			</span>
 		);
 	}
-	if (!data) return <span className="text-[12.5px] text-muted-foreground">{isFetching ? "Loading…" : ""}</span>;
+	if (!data)
+		return (
+			<span className="text-[12.5px] text-muted-foreground">{isFetching ? "Loading…" : ""}</span>
+		);
 	const expires = data.expiresAt ? new Date(data.expiresAt) : null;
 	const days = expires ? Math.ceil((expires.getTime() - Date.now()) / 86_400_000) : null;
 	return (

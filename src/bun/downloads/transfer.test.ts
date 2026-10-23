@@ -21,7 +21,10 @@ function server(opts: { ranged: boolean; status?: number }) {
 		const start = range ? Number(/bytes=(\d+)-/.exec(range)![1]) : 0;
 		if (range && opts.ranged) {
 			if (start >= BODY.length) {
-				return new Response(null, { status: 416, headers: { "content-range": `bytes */${BODY.length}` } });
+				return new Response(null, {
+					status: 416,
+					headers: { "content-range": `bytes */${BODY.length}` },
+				});
 			}
 			return new Response(BODY.slice(start), {
 				status: 206,
@@ -38,7 +41,12 @@ function paths(name: string) {
 	return { finalPath, partPath: `${finalPath}.part` };
 }
 
-const base = { url: "https://x.test/f", expectedBytes: 20, signal: new AbortController().signal, onProgress: () => {} };
+const base = {
+	url: "https://x.test/f",
+	expectedBytes: 20,
+	signal: new AbortController().signal,
+	onProgress: () => {},
+};
 
 describe("transfer", () => {
 	test("fresh download writes the file and removes .part", async () => {

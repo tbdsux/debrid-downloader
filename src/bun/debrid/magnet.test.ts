@@ -5,7 +5,9 @@ const HASH = "c9e15763f722f23e98a29decdfae341b98d53056";
 
 describe("magnet parsing", () => {
 	test("full magnet with name", () => {
-		const m = parseMagnet(`magnet:?xt=urn:btih:${HASH.toUpperCase()}&dn=Big+Buck+Bunny&tr=udp%3A%2F%2Fx`);
+		const m = parseMagnet(
+			`magnet:?xt=urn:btih:${HASH.toUpperCase()}&dn=Big+Buck+Bunny&tr=udp%3A%2F%2Fx`,
+		);
 		expect(m).toEqual({
 			hash: HASH,
 			name: "Big Buck Bunny",
@@ -25,7 +27,9 @@ describe("magnet parsing", () => {
 
 	test("clipboard candidates", () => {
 		expect(clipboardCandidate(`  ${HASH}  `)).toBe(HASH);
-		expect(clipboardCandidate("https://host.example/f/Movie.mkv some text")).toBe("https://host.example/f/Movie.mkv");
+		expect(clipboardCandidate("https://host.example/f/Movie.mkv some text")).toBe(
+			"https://host.example/f/Movie.mkv",
+		);
 		expect(clipboardCandidate("https://git.example/Libraries/debrid-ts")).toBeNull();
 		expect(clipboardCandidate("just words")).toBeNull();
 		expect(clipboardCandidate(null)).toBeNull();

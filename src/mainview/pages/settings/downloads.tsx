@@ -18,7 +18,10 @@ const CONCURRENCY = Array.from({ length: MAX_CONCURRENT - MIN_CONCURRENT + 1 }, 
 	const n = String(i + MIN_CONCURRENT);
 	return { value: n, label: n };
 });
-const RETRIES = [0, 1, 2, 3, 5, 10].map((n) => ({ value: String(n), label: n === 0 ? "Never" : `${n} times` }));
+const RETRIES = [0, 1, 2, 3, 5, 10].map((n) => ({
+	value: String(n),
+	label: n === 0 ? "Never" : `${n} times`,
+}));
 const CONFLICT: { value: ConflictMode; label: string }[] = [
 	{ value: "rename", label: "Keep both (rename)" },
 	{ value: "overwrite", label: "Overwrite" },
@@ -35,7 +38,8 @@ export default function DownloadsSection() {
 	useEffect(() => setDir(d.dir), [d.dir]);
 	useEffect(() => setLimit(d.speedLimit ? String(d.speedLimit) : ""), [d.speedLimit]);
 
-	const commitDir = (value = dir) => value.trim() && value !== d.dir && save.mutate({ dir: value.trim() });
+	const commitDir = (value = dir) =>
+		value.trim() && value !== d.dir && save.mutate({ dir: value.trim() });
 	const commitLimit = () => {
 		const n = Math.max(0, Math.round(Number(limit) || 0));
 		if (n !== d.speedLimit) save.mutate({ speedLimit: n });
@@ -43,10 +47,17 @@ export default function DownloadsSection() {
 
 	return (
 		<>
-			<PaneHeader title="Downloads" description="Where files go and how they're transferred. Changes apply right away." />
+			<PaneHeader
+				title="Downloads"
+				description="Where files go and how they're transferred. Changes apply right away."
+			/>
 
 			<Group title="Location">
-				<Row label="Download folder" hint="New downloads are saved here unless you pick another folder when adding." stacked>
+				<Row
+					label="Download folder"
+					hint="New downloads are saved here unless you pick another folder when adding."
+					stacked
+				>
 					<div className="flex gap-2">
 						<Input
 							value={dir}
@@ -72,7 +83,10 @@ export default function DownloadsSection() {
 						</Button>
 					</div>
 				</Row>
-				<Row label="Create a folder for multi-file torrents" hint="Files are grouped under the torrent's name.">
+				<Row
+					label="Create a folder for multi-file torrents"
+					hint="Files are grouped under the torrent's name."
+				>
 					<Switch checked={d.subfolder} onCheckedChange={(v) => save.mutate({ subfolder: v })} />
 				</Row>
 				<Row label="If a file already exists">
@@ -96,7 +110,10 @@ export default function DownloadsSection() {
 			</Group>
 
 			<Group title="Transfers">
-				<Row label="Simultaneous downloads" hint="Files transferring at the same time. Others wait in the queue.">
+				<Row
+					label="Simultaneous downloads"
+					hint="Files transferring at the same time. Others wait in the queue."
+				>
 					<Select
 						items={CONCURRENCY}
 						value={String(d.concurrent)}

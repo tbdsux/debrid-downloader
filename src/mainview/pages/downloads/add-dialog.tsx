@@ -18,7 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { AccountSelect } from "@/components/app-ui";
-import { pickFolder, useSettings } from "@/lib/use-settings";
+import { pickFolder, useSettings, NO_ACCOUNTS } from "@/lib/use-settings";
 import { fileToBase64, useAddJobs, useAddTorrentFiles } from "@/lib/use-downloads";
 import { errText, rpc } from "@/lib/rpc";
 import { bytes } from "@/lib/format";
@@ -46,7 +46,7 @@ export function AddDialog({
 	prefill?: AddPrefill;
 }) {
 	const { data: settings } = useSettings();
-	const accounts = settings?.accounts ?? [];
+	const accounts = settings?.accounts ?? NO_ACCOUNTS;
 	const [tab, setTab] = useState<AddTab>("magnet");
 	const [magnets, setMagnets] = useState("");
 	const [links, setLinks] = useState("");
@@ -117,7 +117,9 @@ export function AddDialog({
 	async function onDrop(e: DragEvent) {
 		e.preventDefault();
 		setDragging(false);
-		const dropped = [...e.dataTransfer.files].filter((f) => f.name.toLowerCase().endsWith(".torrent"));
+		const dropped = [...e.dataTransfer.files].filter((f) =>
+			f.name.toLowerCase().endsWith(".torrent"),
+		);
 		if (dropped.length) {
 			const read = await Promise.all(
 				dropped.map(async (f) => ({ name: f.name, base64: await fileToBase64(f) })),
@@ -250,7 +252,13 @@ export function AddDialog({
 					<div className="grid grid-cols-[88px_1fr] items-center gap-x-3 gap-y-2.5">
 						<Label className="text-muted-foreground">Account</Label>
 						{accounts.length ? (
-							<AccountSelect accounts={accounts} value={accountId} onChange={setAccountId} allowAuto className="w-full" />
+							<AccountSelect
+								accounts={accounts}
+								value={accountId}
+								onChange={setAccountId}
+								allowAuto
+								className="w-full"
+							/>
 						) : (
 							<p className="text-[13px] text-muted-foreground">
 								No accounts yet —{" "}

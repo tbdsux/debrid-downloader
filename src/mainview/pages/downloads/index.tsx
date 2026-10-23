@@ -46,7 +46,7 @@ import { Button } from "@/components/ui/button";
 import { ProviderBadge, SectionTitle, ToolButton, ToolSep, Kbd } from "@/components/app-ui";
 import { useConfirm } from "@/components/confirm";
 import { fileToBase64, jobAction, taskAction, useJobs } from "@/lib/use-downloads";
-import { useSettings } from "@/lib/use-settings";
+import { useSettings, NO_ACCOUNTS } from "@/lib/use-settings";
 import { tabFor, useOpenAdd } from "@/lib/add-dialog-context";
 import { errText, rpc } from "@/lib/rpc";
 import type { JobAction, JobPublic, JobStatus } from "../../../shared/rpc-schema";
@@ -56,9 +56,19 @@ import { HeaderRow, JobRow, TaskRow } from "./rows";
 
 type Filter = "all" | "active" | "service" | "paused" | "completed" | "failed";
 
-const FILTERS: { id: Filter; label: string; icon: typeof LayersIcon; match: (s: JobStatus) => boolean }[] = [
+const FILTERS: {
+	id: Filter;
+	label: string;
+	icon: typeof LayersIcon;
+	match: (s: JobStatus) => boolean;
+}[] = [
 	{ id: "all", label: "All", icon: LayersIcon, match: () => true },
-	{ id: "active", label: "Downloading", icon: ArrowDownCircleIcon, match: (s) => s === "downloading" },
+	{
+		id: "active",
+		label: "Downloading",
+		icon: ArrowDownCircleIcon,
+		match: (s) => s === "downloading",
+	},
 	{
 		id: "service",
 		label: "On service",
@@ -78,7 +88,7 @@ const seenClipboard = new Set<string>();
 export default function DownloadsPage() {
 	const { data: jobs = [], isPending } = useJobs();
 	const { data: settings } = useSettings();
-	const accounts = settings?.accounts ?? [];
+	const accounts = settings?.accounts ?? NO_ACCOUNTS;
 	const accountById = useMemo(() => new Map(accounts.map((a) => [a.id, a])), [accounts]);
 	const openAdd = useOpenAdd();
 	const [confirm, confirmNode] = useConfirm();
@@ -134,12 +144,17 @@ export default function DownloadsPage() {
 		});
 	}, [visible]);
 
-	const selectedJobs = useMemo(() => visible.filter((j) => selected.has(j.id)), [visible, selected]);
+	const selectedJobs = useMemo(
+		() => visible.filter((j) => selected.has(j.id)),
+		[visible, selected],
+	);
 	const ids = selectedJobs.map((j) => j.id);
 	const can = {
 		pause: selectedJobs.some((j) => !["paused", "completed", "failed"].includes(j.status)),
 		resume: selectedJobs.some((j) => j.status === "paused"),
-		retry: selectedJobs.some((j) => j.status === "failed" || j.tasks.some((t) => t.status === "failed")),
+		retry: selectedJobs.some(
+			(j) => j.status === "failed" || j.tasks.some((t) => t.status === "failed"),
+		),
 		remove: selectedJobs.length > 0,
 	};
 
@@ -210,7 +225,8 @@ export default function DownloadsPage() {
 		[],
 	);
 	const onTaskOpen = useCallback(
-		(jobId: string, taskId: string, reveal?: boolean) => void rpc.request.openPath({ jobId, taskId, reveal }),
+		(jobId: string, taskId: string, reveal?: boolean) =>
+			void rpc.request.openPath({ jobId, taskId, reveal }),
 		[],
 	);
 
@@ -314,7 +330,9 @@ export default function DownloadsPage() {
 	async function onDrop(e: React.DragEvent) {
 		e.preventDefault();
 		setDragging(false);
-		const torrents = [...e.dataTransfer.files].filter((f) => f.name.toLowerCase().endsWith(".torrent"));
+		const torrents = [...e.dataTransfer.files].filter((f) =>
+			f.name.toLowerCase().endsWith(".torrent"),
+		);
 		if (torrents.length) {
 			const files = await Promise.all(
 				torrents.map(async (f) => ({ name: f.name, base64: await fileToBase64(f) })),
@@ -352,7 +370,11 @@ export default function DownloadsPage() {
 							key={f.id}
 							active={filter === f.id}
 							onClick={() => setFilter(f.id)}
-							icon={<f.icon className={cn(f.id === "failed" && counts.failed > 0 && "text-destructive")} />}
+							icon={
+								<f.icon
+									className={cn(f.id === "failed" && counts.failed > 0 && "text-destructive")}
+								/>
+							}
 							label={f.label}
 							count={counts[f.id]}
 						/>
@@ -391,13 +413,21 @@ export default function DownloadsPage() {
 					</>
 				)}
 				<dl className="mt-auto grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-1 border-t p-3 text-[11px] text-muted-foreground">
-					<dt><Kbd>Ctrl+N</Kbd></dt>
+					<dt>
+						<Kbd>Ctrl+N</Kbd>
+					</dt>
 					<dd>Add downloads</dd>
-					<dt><Kbd>Ctrl+V</Kbd></dt>
+					<dt>
+						<Kbd>Ctrl+V</Kbd>
+					</dt>
 					<dd>Paste magnet / link</dd>
-					<dt><Kbd>Space</Kbd></dt>
+					<dt>
+						<Kbd>Space</Kbd>
+					</dt>
 					<dd>Pause / resume</dd>
-					<dt><Kbd>Del</Kbd></dt>
+					<dt>
+						<Kbd>Del</Kbd>
+					</dt>
 					<dd>Remove</dd>
 				</dl>
 			</aside>
@@ -406,7 +436,10 @@ export default function DownloadsPage() {
 			<section
 				className="relative flex min-w-0 flex-1 flex-col"
 				onDragOver={(e) => {
-					if (e.dataTransfer.types.includes("Files") || e.dataTransfer.types.includes("text/plain")) {
+					if (
+						e.dataTransfer.types.includes("Files") ||
+						e.dataTransfer.types.includes("text/plain")
+					) {
 						e.preventDefault();
 						setDragging(true);
 					}
@@ -425,9 +458,24 @@ export default function DownloadsPage() {
 						onClick={() => openAdd()}
 					/>
 					<ToolSep />
-					<ToolButton icon={<PlayIcon />} label="Resume" disabled={!can.resume} onClick={() => run("resume")} />
-					<ToolButton icon={<PauseIcon />} label="Pause" disabled={!can.pause} onClick={() => run("pause")} />
-					<ToolButton icon={<RotateCcwIcon />} label="Retry" disabled={!can.retry} onClick={() => run("retry")} />
+					<ToolButton
+						icon={<PlayIcon />}
+						label="Resume"
+						disabled={!can.resume}
+						onClick={() => run("resume")}
+					/>
+					<ToolButton
+						icon={<PauseIcon />}
+						label="Pause"
+						disabled={!can.pause}
+						onClick={() => run("pause")}
+					/>
+					<ToolButton
+						icon={<RotateCcwIcon />}
+						label="Retry"
+						disabled={!can.retry}
+						onClick={() => run("retry")}
+					/>
 					<ToolSep />
 					<ToolButton
 						icon={<Trash2Icon />}
@@ -443,7 +491,9 @@ export default function DownloadsPage() {
 						showLabel={false}
 						tip="Open folder"
 						disabled={selectedJobs.length !== 1}
-						onClick={() => selectedJobs[0] && rpc.request.openPath({ jobId: selectedJobs[0].id, reveal: true })}
+						onClick={() =>
+							selectedJobs[0] && rpc.request.openPath({ jobId: selectedJobs[0].id, reveal: true })
+						}
 					/>
 					<ToolButton
 						icon={<BrushCleaningIcon />}
@@ -455,7 +505,9 @@ export default function DownloadsPage() {
 					/>
 					<div className="ml-auto flex items-center gap-2">
 						{selectedJobs.length > 0 && (
-							<span className="text-xs text-muted-foreground tabular-nums">{selectedJobs.length} selected</span>
+							<span className="text-xs text-muted-foreground tabular-nums">
+								{selectedJobs.length} selected
+							</span>
 						)}
 						<div className="relative">
 							<SearchIcon className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -604,7 +656,8 @@ export default function DownloadsPage() {
 								<ContextMenuItem
 									disabled={selectedJobs.length !== 1}
 									onClick={() =>
-										selectedJobs[0] && rpc.request.openPath({ jobId: selectedJobs[0].id, reveal: true })
+										selectedJobs[0] &&
+										rpc.request.openPath({ jobId: selectedJobs[0].id, reveal: true })
 									}
 								>
 									<FolderOpenIcon /> Show in folder

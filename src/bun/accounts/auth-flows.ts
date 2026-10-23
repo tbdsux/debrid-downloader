@@ -10,7 +10,13 @@ import type { AuthFlowStart, ProviderId } from "../../shared/rpc-schema";
 type Flow = { cancelled: boolean };
 const flows = new Map<string, Flow>();
 
-export type FlowDone = (r: { flowId: string; ok: boolean; state?: SettingsState; accountId?: string; error?: string }) => void;
+export type FlowDone = (r: {
+	flowId: string;
+	ok: boolean;
+	state?: SettingsState;
+	accountId?: string;
+	error?: string;
+}) => void;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -119,7 +125,11 @@ function runPoll(
 		}
 		flows.delete(flowId);
 		if (!flow.cancelled) {
-			done({ flowId, ok: false, error: lastError ? `Sign-in expired (${lastError})` : "Sign-in code expired" });
+			done({
+				flowId,
+				ok: false,
+				error: lastError ? `Sign-in expired (${lastError})` : "Sign-in code expired",
+			});
 		}
 	})();
 }

@@ -38,6 +38,8 @@ hutch run dev:hmr        # dev with Vite HMR (recommended during development)
 hutch run dev            # dev without HMR (bundled assets, vite build first)
 hutch run build:canary   # production build (canary env)
 hutch run build          # production build (stable env)
+hutch run lint           # oxlint (.oxlintrc.json); lint:fix applies safe fixes
+hutch run fmt            # oxfmt (.oxfmtrc.json); CI fails on fmt:check, so format before committing
 ```
 
 Dependency management uses **Hutch's built-in npm-compatible resolver**:
@@ -71,12 +73,12 @@ export const rpcSchema = {
 ```ts
 // Main process (src/bun/index.ts)
 const rpc = defineElectrobunRPC("bun", {
-  handlers: {
-    requests: {
-      addMagnet: ({ magnet }) => debrid.addMagnet(magnet), // params shape per schema
-    },
-    messages: {}, // handles messages the webview sends (usually none)
-  },
+	handlers: {
+		requests: {
+			addMagnet: ({ magnet }) => debrid.addMagnet(magnet), // params shape per schema
+		},
+		messages: {}, // handles messages the webview sends (usually none)
+	},
 });
 
 new BrowserWindow({ title: "...", url, rpc }); // pass rpc in window options
@@ -87,17 +89,18 @@ new BrowserWindow({ title: "...", url, rpc }); // pass rpc in window options
 import { Electroview, defineElectrobunRPC } from "electrobun/view";
 
 const rpc = defineElectrobunRPC("webview", {
-  handlers: { requests: {}, messages: {} },
+	handlers: { requests: {}, messages: {} },
 });
 new Electroview({ rpc });
 
 // anywhere in React:
-await rpc.request.addMagnet({ magnet });           // typed request → main
-rpc.message.downloadProgress({ id, pct: 50 });     // fire-and-forget message → main
+await rpc.request.addMagnet({ magnet }); // typed request → main
+rpc.message.downloadProgress({ id, pct: 50 }); // fire-and-forget message → main
 // main → view messages arrive via the main-side message handlers
 ```
 
 Notes:
+
 - Requests are promise-based with an optional `maxRequestTime` timeout.
 - Messages are one-way (no response). Use requests for "do X and give me a result", messages for events/progress pushes.
 - Create the `Electroview` once at startup (in/near `main.tsx`), not per component.

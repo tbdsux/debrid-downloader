@@ -10,7 +10,14 @@ import {
 	type AccountSecret,
 	type SettingsState,
 } from "../settings";
-import { dropClient, errorMessage, isAuthError, isNetworkError, makeClient, withClient } from "./clients";
+import {
+	dropClient,
+	errorMessage,
+	isAuthError,
+	isNetworkError,
+	makeClient,
+	withClient,
+} from "./clients";
 import type { ProviderId } from "../../shared/rpc-schema";
 import type { UserInfo } from "debrid-ts";
 
@@ -50,7 +57,7 @@ export async function addAccount(
 			provider,
 			label: label.trim() || (sameService ? `account ${sameService + 1}` : "main"),
 			auth: secret.kind,
-			hint: hintFor(secret.kind === "apikey" ? token : (secret.refreshToken || token)),
+			hint: hintFor(secret.kind === "apikey" ? token : secret.refreshToken || token),
 			status: "ok",
 			addedAt: new Date().toISOString(),
 			...userFields(user),
@@ -138,8 +145,7 @@ export async function resolveAccountId(requested: string): Promise<string> {
 		return requested;
 	}
 	const usable = s.accounts.filter((a) => a.status !== "invalid");
-	const pick =
-		usable.find((a) => a.id === s.defaultAccountId) ?? usable[0] ?? s.accounts[0];
+	const pick = usable.find((a) => a.id === s.defaultAccountId) ?? usable[0] ?? s.accounts[0];
 	if (!pick) throw new Error("Add a debrid account in Settings → Accounts first");
 	return pick.id;
 }

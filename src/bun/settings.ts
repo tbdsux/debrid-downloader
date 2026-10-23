@@ -97,8 +97,7 @@ function normDownloads(d: Partial<DownloadsSettings> | undefined): DownloadsSett
 		concurrent: clampConcurrent(Number(d?.concurrent ?? 3)),
 		speedLimit: clampInt(d?.speedLimit, 0, 10_000_000, 0),
 		subfolder: d?.subfolder ?? true,
-		conflict:
-			d?.conflict === "overwrite" || d?.conflict === "skip" ? d.conflict : "rename",
+		conflict: d?.conflict === "overwrite" || d?.conflict === "skip" ? d.conflict : "rename",
 		retries: clampInt(d?.retries, 0, 10, 3),
 	};
 }
@@ -231,9 +230,7 @@ export function onSettingsChanged(fn: (s: SettingsState) => void): () => void {
 let writing: Promise<void> = Promise.resolve();
 
 /** Apply a mutation to the in-memory state and persist (writes serialized). */
-export async function updateSettings(
-	mutate: (s: SettingsState) => void,
-): Promise<SettingsState> {
+export async function updateSettings(mutate: (s: SettingsState) => void): Promise<SettingsState> {
 	const s = await loadSettings();
 	mutate(s);
 	s.downloads = normDownloads(s.downloads);

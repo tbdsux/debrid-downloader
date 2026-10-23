@@ -6,12 +6,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { errText, onPush, rpc } from "./rpc";
 import type {
+	AccountPublic,
 	AdvancedSettings,
 	DownloadsSettings,
 	GeneralSettings,
 	ProviderId,
 	PublicSettings,
 } from "../../shared/rpc-schema";
+
+/** Stable fallback while settings load; a fresh `[]` each render would retrigger effects keyed on accounts. */
+export const NO_ACCOUNTS: AccountPublic[] = [];
 
 export const SETTINGS_KEY = ["settings"] as const;
 
@@ -63,8 +67,7 @@ export const useReorderAccounts = () =>
 	useSave((ids: string[]) => rpc.request.reorderAccounts({ ids }));
 export const useRemoveAccount = () =>
 	useSave((id: string) => rpc.request.removeAccount({ id }), "Account removed");
-export const useRefreshAccount = () =>
-	useSave((id: string) => rpc.request.refreshAccount({ id }));
+export const useRefreshAccount = () => useSave((id: string) => rpc.request.refreshAccount({ id }));
 
 /** Native folder picker (main process). Resolves null when cancelled. */
 export function pickFolder(startingFolder?: string): Promise<string | null> {

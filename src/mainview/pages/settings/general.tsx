@@ -38,7 +38,9 @@ export default function GeneralSection() {
 								onClick={() => save.mutate({ theme: t.value })}
 								className={cn(
 									"flex h-7 items-center gap-1.5 rounded-md px-3 text-[13px] transition-colors [&_svg]:size-3.5",
-									g.theme === t.value ? "bg-background font-medium shadow-sm" : "text-muted-foreground hover:text-foreground",
+									g.theme === t.value
+										? "bg-background font-medium shadow-sm"
+										: "text-muted-foreground hover:text-foreground",
 								)}
 							>
 								<t.icon />
@@ -50,7 +52,10 @@ export default function GeneralSection() {
 			</Group>
 
 			<Group title="Behaviour">
-				<Row label="Detect links on the clipboard" hint="Offer to add a magnet or link you copied when the window gets focus.">
+				<Row
+					label="Detect links on the clipboard"
+					hint="Offer to add a magnet or link you copied when the window gets focus."
+				>
 					<Switch checked={g.clipboard} onCheckedChange={(v) => save.mutate({ clipboard: v })} />
 				</Row>
 				<Row label="Notify when a download completes" hint="Uses your system's notifications.">
@@ -60,7 +65,10 @@ export default function GeneralSection() {
 					label="Remove from debrid account after downloading"
 					hint="Keeps your cloud tidy. The torrent is deleted from the service once every file is on disk."
 				>
-					<Switch checked={g.deleteAfter} onCheckedChange={(v) => save.mutate({ deleteAfter: v })} />
+					<Switch
+						checked={g.deleteAfter}
+						onCheckedChange={(v) => save.mutate({ deleteAfter: v })}
+					/>
 				</Row>
 				<Row
 					label="Check service progress"
