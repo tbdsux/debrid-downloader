@@ -14,6 +14,73 @@ Built with [Electrobun](https://framework.blackboard.sh/electrobun/) (not Electr
 - Parallel downloads with progress, speed limit and resume
 - API keys stay in the main process, encrypted at rest, and never reach the UI
 
+## Installing
+
+Download the file for your platform from the [latest release](https://github.com/tbdsux/debrid-downloader/releases/latest), or use the commands below. The app updates itself after that: at launch it downloads a newer release in the background and offers a restart.
+
+| Platform                  | File                                      | Notes                                  |
+| ------------------------- | ----------------------------------------- | -------------------------------------- |
+| macOS 14+ (Apple Silicon) | `macos-arm64-DebridDownloader.dmg`        | not signed, see below                  |
+| Windows 10/11 (x64)       | `win-x64-DebridDownloader-Setup.zip`      | contains `Debrid Downloader-Setup.exe` |
+| Linux (x64)               | `linux-x64-DebridDownloader-Setup.tar.gz` | contains an `installer` program        |
+
+The other files in a release (`*.tar.zst`, `*-update.json`) are for the auto-updater; you don't need them.
+
+### macOS
+
+```bash
+curl -fLO https://github.com/tbdsux/debrid-downloader/releases/latest/download/macos-arm64-DebridDownloader.dmg
+hdiutil attach macos-arm64-DebridDownloader.dmg -nobrowse -mountpoint /Volumes/DebridDownloader
+cp -R "/Volumes/DebridDownloader/Debrid Downloader.app" /Applications/
+hdiutil detach /Volumes/DebridDownloader
+xattr -cr "/Applications/Debrid Downloader.app"   # unsigned build, see warning
+open "/Applications/Debrid Downloader.app"
+```
+
+> [!WARNING]
+> **macOS builds are not signed or notarized.** Without the `xattr -cr` step, macOS blocks the app on first launch with "Debrid Downloader is damaged and can't be opened" or "cannot verify the developer". Run it once you trust the download.
+
+### Windows (PowerShell)
+
+```powershell
+Invoke-WebRequest https://github.com/tbdsux/debrid-downloader/releases/latest/download/win-x64-DebridDownloader-Setup.zip -OutFile DebridDownloader-Setup.zip
+Expand-Archive DebridDownloader-Setup.zip -DestinationPath DebridDownloader-Setup
+& ".\DebridDownloader-Setup\Debrid Downloader-Setup.exe"
+```
+
+The setup program is not signed either: if SmartScreen shows "Windows protected your PC", click **More info → Run anyway**. It installs for your user only (no admin prompt) and adds a Start menu shortcut.
+
+### Linux
+
+The app uses the system WebKitGTK, so install it first:
+
+```bash
+sudo apt install libgtk-3-0 libwebkit2gtk-4.1-0     # Debian / Ubuntu 22.04+
+sudo dnf install gtk3 webkit2gtk4.1                 # Fedora
+sudo pacman -S gtk3 webkit2gtk-4.1                  # Arch
+```
+
+Then download and run the installer:
+
+```bash
+curl -fLO https://github.com/tbdsux/debrid-downloader/releases/latest/download/linux-x64-DebridDownloader-Setup.tar.gz
+mkdir -p DebridDownloader-Setup
+tar -xzf linux-x64-DebridDownloader-Setup.tar.gz -C DebridDownloader-Setup
+./DebridDownloader-Setup/installer
+```
+
+It installs into `~/.local/share/com.werklabs.debriddownloader/` and adds an app-menu entry. No root needed.
+
+### Uninstalling
+
+| Platform | How                                                                             |
+| -------- | ------------------------------------------------------------------------------- |
+| macOS    | `~/Library/Application\ Support/com.werklabs.debriddownloader/stable/uninstall` |
+| Windows  | **Settings → Apps → Installed apps → Debrid Downloader → Uninstall**            |
+| Linux    | `~/.local/share/com.werklabs.debriddownloader/stable/uninstall`                 |
+
+The uninstaller asks whether to keep your settings and accounts. Add `--quiet` to skip the prompt (keeps data) or `--quiet --delete-data` to remove everything.
+
 ## Requirements
 
 - [Hutch](https://framework.blackboard.sh/electrobun/guides/hutch/), the toolchain that installs dependencies and runs Electrobun
@@ -41,20 +108,13 @@ hutch run build          # stable channel
 
 The output goes to `artifacts/`:
 
-| File            | Purpose                                  |
-| --------------- | ---------------------------------------- |
-| `*.dmg`         | macOS installer to hand out to users     |
-| `*.app.tar.zst` | compressed app, used by the auto-updater |
-| `*-update.json` | update manifest for the channel          |
+| File                                                               | Purpose                                                         |
+| ------------------------------------------------------------------ | --------------------------------------------------------------- |
+| `*.dmg` (macOS), `*-Setup.zip` (Windows), `*-Setup.tar.gz` (Linux) | installers to hand out to users (see [Installing](#installing)) |
+| `*.tar.zst`                                                        | compressed app, used by the auto-updater                        |
+| `*-update.json`                                                    | update manifest for the channel                                 |
 
-Installed apps check `releases/latest/download` on GitHub at launch, download a newer stable build in the background, and offer a restart to finish updating.
-
-> [!WARNING]
-> **macOS builds are not signed or notarized.** macOS blocks the app on first launch with "Debrid Downloader is damaged and can't be opened" or "cannot verify the developer". Once you trust the download, clear the quarantine flag:
->
-> ```bash
-> xattr -cr "/Applications/Debrid Downloader.app"
-> ```
+Each OS builds on itself, so `artifacts/` only has your own platform's files; CI builds all three. The auto-updater reads `release.baseUrl` in `electrobun.config.ts` (GitHub's `releases/latest/download`).
 
 ### CI
 
