@@ -56,7 +56,7 @@ Installed apps check `releases/latest/download` on GitHub at launch, download a 
 
 ### CI
 
-`.github/workflows/build.yml` builds macOS, Linux and Windows on every push and pull request (canary channel) and uploads the result as workflow artifacts.
+`.github/workflows/ci.yml` runs the unit tests on every push and pull request. `.github/workflows/release.yml` builds macOS, Linux and Windows: a manual run ("Run workflow" in the Actions tab) builds the canary channel as workflow artifacts.
 
 ## App icon
 

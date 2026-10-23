@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_call: # release.yml runs the tests before building
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Hutch
+        run: |
+          curl -fsSL https://hutch.blackboard.sh/hutch/install.sh | sh
+          echo "$HOME/.hutch/bin" >> "$GITHUB_PATH"
+
+      # shortcut: not `hutch run install` (--frozen-lockfile), it always fails on Hutch 0.27.1; switch back once fixed.
+      - name: Install dependencies
+        run: hutch install
+
+      - uses: oven-sh/setup-bun@v2
+
+      - run: bun test

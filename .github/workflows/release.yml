@@ -1,19 +1,22 @@
-name: Build
+name: Release
 
+# A v* tag builds stable and publishes a GitHub Release; a manual run builds canary as workflow artifacts only.
 on:
   push:
-    branches: ["**"]
     tags: ["v*"]
-  pull_request:
   workflow_dispatch:
 
 concurrency:
-  group: build-${{ github.ref }}
+  group: release-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  test:
+    uses: ./.github/workflows/ci.yml
+
   build:
     name: Build (${{ matrix.os }})
+    needs: test
     # Electrobun builds each OS on that OS, so every target needs its own runner.
     strategy:
       fail-fast: false
@@ -43,13 +46,6 @@ jobs:
       # shortcut: not `hutch run install` (--frozen-lockfile), it always fails on Hutch 0.27.1; switch back once fixed.
       - name: Install dependencies
         run: hutch install
-
-      - uses: oven-sh/setup-bun@v2
-        if: runner.os == 'Linux'
-
-      - name: Test
-        if: runner.os == 'Linux'
-        run: bun test
 
       # The updater compares builds by hash, but users see app.version, so a tag must match it.
       - name: Check tag matches app version
