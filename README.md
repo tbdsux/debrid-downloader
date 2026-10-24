@@ -14,6 +14,16 @@ Built with [Electrobun](https://framework.blackboard.sh/electrobun/) (not Electr
 - Parallel downloads with progress, speed limit and resume
 - API keys stay in the main process, encrypted at rest, and never reach the UI
 
+## Screenshots
+
+macOS
+
+![Debrid Downloader on macOS](screenshots/mac.png)
+
+Linux
+
+![Debrid Downloader on Linux](screenshots/linux.png)
+
 ## Installing
 
 Download the file for your platform from the [latest release](https://github.com/tbdsux/debrid-downloader/releases/latest), or use the commands below. The app updates itself after that: at launch it downloads a newer release in the background and offers a restart.
