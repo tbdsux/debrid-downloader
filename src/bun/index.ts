@@ -20,6 +20,7 @@ import { cancelAuthFlow, startAuthFlow } from "./accounts/auth-flows";
 import { DownloadManager } from "./downloads/manager";
 import * as cloud from "./cloud";
 import { clipboardCandidate, splitLines } from "./debrid/magnet";
+import { ExternalInbox } from "./external";
 import { flushFrame, loadFrame, saveFrame } from "./window-state";
 import type { AppRpcSchema, JobPublic } from "../shared/rpc-schema";
 
@@ -169,6 +170,10 @@ const rpc = defineElectrobunRPC<AppRpcSchema, "bun">("bun", {
 			cloudDownloadItems: ({ accountId, items, dir }) =>
 				manager.addCloudItems(accountId, items, dir),
 			cloudDelete: ({ accountId, torrentIds }) => cloud.remove(accountId, torrentIds),
+			takeExternalAdd: async () => {
+				viewReady = true;
+				return inbox.take();
+			},
 			applyUpdate: async () => {
 				manager.flush();
 				flushFrame();
@@ -177,6 +182,23 @@ const rpc = defineElectrobunRPC<AppRpcSchema, "bun">("bun", {
 		},
 		messages: {},
 	},
+});
+
+// ---------------------------------------------------------------- open with
+
+// magnet: links and .torrent files from the OS (macOS: urlSchemes /
+// fileAssociations in electrobun.config.ts). Queued until the view asks for
+// them on mount, then pushed live; the Add dialog confirms before anything starts.
+const inbox = new ExternalInbox();
+let viewReady = false;
+let mainWindow: BrowserWindow | undefined;
+
+Electrobun.events.on("open-url", (e: { data: { url: string } }) => {
+	if (!inbox.push(e.data.url)) return;
+	mainWindow?.activate();
+	if (!viewReady) return;
+	const add = inbox.take();
+	if (add) rpc.send.externalAdd(add);
 });
 
 // ---------------------------------------------------------------- window
@@ -215,7 +237,7 @@ function displayWorkAreas() {
 	}
 }
 
-const mainWindow = new BrowserWindow({
+mainWindow = new BrowserWindow({
 	title: "Debrid Downloader",
 	// macOS: the app header doubles as the title bar (traffic lights inset over it).
 	titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",

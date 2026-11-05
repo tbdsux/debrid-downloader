@@ -5,6 +5,8 @@ export type AddPrefill = {
 	tab?: AddTab;
 	text?: string;
 	files?: { name: string; base64: string }[];
+	/** Merge into an already-open dialog instead of resetting it. */
+	append?: boolean;
 };
 
 export const AddDialogContext = createContext<(prefill?: AddPrefill) => void>(() => {});

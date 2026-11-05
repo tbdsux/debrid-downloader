@@ -63,7 +63,8 @@ export function AddDialog({
 	useEffect(() => {
 		if (!open) return;
 		setTab(prefill?.tab ?? (prefill?.files?.length ? "torrent" : "magnet"));
-		setMagnets(prefill?.tab === "magnet" || !prefill?.tab ? (prefill?.text ?? "") : "");
+		// Text goes to Links only for the link tab; a torrent prefill may carry magnets too.
+		setMagnets(prefill?.tab !== "link" ? (prefill?.text ?? "") : "");
 		setLinks(prefill?.tab === "link" ? (prefill.text ?? "") : "");
 		setFiles(prefill?.files ?? []);
 		setDir(settings?.downloads.dir ?? "");
@@ -72,6 +73,19 @@ export function AddDialog({
 		setTimeout(() => textRef.current?.focus(), 50);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [open]);
+
+	// "Open with" while the dialog is already open: add to what's there.
+	useEffect(() => {
+		if (!open || !prefill?.append) return;
+		const text = prefill.text?.trim();
+		if (text) {
+			if (prefill.tab === "link") setLinks((l) => (l ? `${l}\n${text}` : text));
+			else setMagnets((m) => (m ? `${m}\n${text}` : text));
+		}
+		if (prefill.files?.length) setFiles((f) => dedupe([...f, ...prefill.files!]));
+		if (prefill.tab) setTab(prefill.tab);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [prefill]);
 
 	const magnetLines = useMemo(() => lines(magnets), [magnets]);
 	const linkLines = useMemo(() => lines(links), [links]);

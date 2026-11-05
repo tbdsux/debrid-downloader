@@ -6,6 +6,11 @@ export default {
 		identifier: "com.werklabs.debriddownloader",
 		// Keep in sync with package.json "version".
 		version: "0.1.1",
+		// "Open with": magnet links and .torrent files land in the Add dialog
+		// (handled by the "open-url" listener in src/bun/index.ts). macOS only for now;
+		// Electrobun doesn't register these on Windows/Linux yet.
+		urlSchemes: ["magnet"],
+		fileAssociations: [{ ext: ["torrent"], name: "BitTorrent File", role: "Viewer" }],
 	},
 	build: {
 		mainProcess: "cottontail",

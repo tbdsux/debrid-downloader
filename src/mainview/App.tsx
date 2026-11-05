@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Route, Switch, Link, Router, useLocation } from "wouter";
 import { useHashLocation } from "wouter/use-hash-location";
 import { useQuery } from "@tanstack/react-query";
@@ -22,8 +22,9 @@ import { useJobs, useJobsSync } from "@/lib/use-downloads";
 import { useSettings } from "@/lib/use-settings";
 import { useApplyTheme } from "@/lib/theme";
 import { bytes, speed } from "@/lib/format";
-import { rpc } from "@/lib/rpc";
+import { onPush, rpc } from "@/lib/rpc";
 import { IS_MAC } from "@/lib/platform";
+import type { ExternalAdd } from "../shared/rpc-schema";
 
 const NAV_ITEMS = [
 	{ path: "/", label: "Downloads", icon: DownloadIcon },
@@ -154,10 +155,31 @@ function App() {
 
 	const [addOpen, setAddOpen] = useState(false);
 	const [prefill, setPrefill] = useState<AddPrefill | undefined>();
+	const addOpenRef = useRef(false);
+	useEffect(() => {
+		addOpenRef.current = addOpen;
+	}, [addOpen]);
 	const openAdd = useCallback((p?: AddPrefill) => {
 		setPrefill(p);
 		setAddOpen(true);
 	}, []);
+
+	// Magnets / .torrent files opened with the app (macOS): offer them in the Add dialog.
+	useEffect(() => {
+		const offer = ({ magnets, files }: ExternalAdd) =>
+			openAdd({
+				tab: files.length ? "torrent" : "magnet",
+				text: magnets.join("\n") || undefined,
+				files,
+				append: addOpenRef.current,
+			});
+		const off = onPush("externalAdd", offer);
+		void rpc.request
+			.takeExternalAdd()
+			.then((add) => add && offer(add))
+			.catch(() => {});
+		return off;
+	}, [openAdd]);
 
 	// Ctrl/Cmd+N opens the Add dialog anywhere.
 	useEffect(() => {

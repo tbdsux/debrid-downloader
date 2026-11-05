@@ -214,6 +214,14 @@ export type CloudAccountInfo = {
 	expiresAt: string | null;
 };
 
+// ---------------------------------------------------------------- open with
+
+/** Magnets / .torrent files the OS opened the app with (macOS), merged. */
+export type ExternalAdd = {
+	magnets: string[];
+	files: { name: string; base64: string }[];
+};
+
 // ---------------------------------------------------------------- auth flow
 
 export type AuthFlowStart = {
@@ -331,6 +339,8 @@ export interface AppRpcSchema extends ElectrobunRPCSchema {
 				params: { accountId: string; torrentIds: string[] };
 				response: void;
 			};
+			// open with: drains anything queued before the view was ready
+			takeExternalAdd: { params: undefined; response: ExternalAdd | null };
 			// restarts the app into the downloaded update (after updateReady)
 			applyUpdate: { params: undefined; response: void };
 		};
@@ -344,6 +354,7 @@ export interface AppRpcSchema extends ElectrobunRPCSchema {
 			settingsChanged: PublicSettings;
 			notify: { kind: "success" | "error" | "info"; title: string; description?: string };
 			updateReady: { version: string };
+			externalAdd: ExternalAdd;
 		};
 	};
 }
