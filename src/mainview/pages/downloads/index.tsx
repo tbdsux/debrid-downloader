@@ -81,6 +81,8 @@ const FILTERS: {
 	{ id: "failed", label: "Failed", icon: AlertCircleIcon, match: (s) => s === "failed" },
 ];
 
+const pausable = (j: JobPublic) => !["paused", "completed", "failed"].includes(j.status);
+
 type Row = { type: "job"; job: JobPublic } | { type: "task"; job: JobPublic; index: number };
 
 // Clipboard candidates the user already dismissed or added (per session).
@@ -151,8 +153,12 @@ export default function DownloadsPage() {
 		[visible, selected],
 	);
 	const ids = selectedJobs.map((j) => j.id);
+	// With nothing selected, Pause/Resume act on every download in the list.
+	const bulk = selectedJobs.length === 0;
+	const allPausable = ordered.filter(pausable).map((j) => j.id);
+	const allResumable = ordered.filter((j) => j.status === "paused").map((j) => j.id);
 	const can = {
-		pause: selectedJobs.some((j) => !["paused", "completed", "failed"].includes(j.status)),
+		pause: selectedJobs.some(pausable),
 		resume: selectedJobs.some((j) => j.status === "paused"),
 		retry: selectedJobs.some(
 			(j) => j.status === "failed" || j.tasks.some((t) => t.status === "failed"),
@@ -461,15 +467,15 @@ export default function DownloadsPage() {
 					<ToolSep />
 					<ToolButton
 						icon={<PlayIcon />}
-						label="Resume"
-						disabled={!can.resume}
-						onClick={() => run("resume")}
+						label={bulk ? "Resume all" : "Resume"}
+						disabled={bulk ? !allResumable.length : !can.resume}
+						onClick={() => run("resume", bulk ? allResumable : ids)}
 					/>
 					<ToolButton
 						icon={<PauseIcon />}
-						label="Pause"
-						disabled={!can.pause}
-						onClick={() => run("pause")}
+						label={bulk ? "Pause all" : "Pause"}
+						disabled={bulk ? !allPausable.length : !can.pause}
+						onClick={() => run("pause", bulk ? allPausable : ids)}
 					/>
 					<ToolButton
 						icon={<RotateCcwIcon />}
