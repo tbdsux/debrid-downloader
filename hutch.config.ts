@@ -15,6 +15,6 @@ export default {
 		"fmt:check": "hutch pm exec -- oxfmt --check",
 	},
 	electrobun: {
-		version: "2.0.2",
+		version: "2.0.5",
 	},
 };
