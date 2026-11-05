@@ -148,7 +148,7 @@ const rpc = defineElectrobunRPC<AppRpcSchema, "bun">("bun", {
 			taskAction: async ({ jobId, taskIds, action }) => manager.taskAction(jobId, taskIds, action),
 			clearCompleted: () => manager.clearCompleted(),
 			openPath: async ({ jobId, taskId, reveal }) => manager.openPath(jobId, taskId, reveal),
-			copyLink: ({ jobId, taskId }) => manager.copyLink(jobId, taskId),
+			copyLink: ({ jobIds, taskId }) => manager.copyLink(jobIds, taskId),
 			downloadStats: async () => ({ freeBytes: manager.freeBytes() }),
 
 			// cloud

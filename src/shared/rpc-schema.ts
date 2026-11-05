@@ -288,7 +288,8 @@ export interface AppRpcSchema extends ElectrobunRPCSchema {
 				params: { jobId: string; taskId?: string; reveal?: boolean };
 				response: void;
 			};
-			copyLink: { params: { jobId: string; taskId?: string }; response: boolean };
+			/** Copies the links of one task, or of every file of the given jobs. */
+			copyLink: { params: { jobIds: string[]; taskId?: string }; response: number };
 			downloadStats: { params: undefined; response: DownloadStats };
 			// cloud
 			cloudAccountInfo: { params: { accountId: string }; response: CloudAccountInfo };

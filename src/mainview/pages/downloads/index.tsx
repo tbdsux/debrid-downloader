@@ -262,11 +262,10 @@ export default function DownloadsPage() {
 	);
 
 	const copyLinks = async () => {
-		const job = selectedJobs[0];
-		if (!job) return;
+		if (!ids.length) return;
 		try {
-			const ok = await rpc.request.copyLink({ jobId: job.id });
-			if (ok) toast.success("Link copied");
+			const n = await rpc.request.copyLink({ jobIds: ids });
+			if (n) toast.success(n === 1 ? "Link copied" : `${n} links copied`);
 			else toast.info("No link to copy yet");
 		} catch (err) {
 			toast.error(errText(err));
@@ -663,8 +662,8 @@ export default function DownloadsPage() {
 								>
 									<FolderOpenIcon /> Show in folder
 								</ContextMenuItem>
-								<ContextMenuItem disabled={selectedJobs.length !== 1} onClick={copyLinks}>
-									<CopyIcon /> Copy download link
+								<ContextMenuItem onClick={copyLinks}>
+									<CopyIcon /> Copy download link{selectedJobs.length > 1 ? "s" : ""}
 								</ContextMenuItem>
 								<ContextMenuSeparator />
 								<ContextMenuItem onClick={() => run("remove")}>

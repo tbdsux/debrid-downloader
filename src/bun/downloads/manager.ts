@@ -837,20 +837,22 @@ export class DownloadManager {
 		else this.hooks.toast("info", "Nothing on disk yet");
 	}
 
-	async copyLink(jobId: string, taskId?: string): Promise<boolean> {
-		const job = this.jobs.get(jobId);
-		if (!job) return false;
-		const tasks = taskId ? job.tasks.filter((t) => t.id === taskId) : job.tasks;
-		let text: string;
-		if (tasks.length) {
-			const urls: string[] = [];
-			for (const t of tasks) urls.push((t.url ??= await this.resolveUrl(job, t)));
-			text = urls.join("\n");
-		} else if (job.kind === "magnet" || job.kind === "link") {
-			text = job.source ?? "";
-		} else return false;
-		Utils.clipboardWriteText(text);
-		return true;
+	/** Copy direct links to the clipboard; returns how many were copied. */
+	async copyLink(jobIds: string[], taskId?: string): Promise<number> {
+		const out: string[] = [];
+		for (const jobId of jobIds) {
+			const job = this.jobs.get(jobId);
+			if (!job) continue;
+			const tasks = taskId ? job.tasks.filter((t) => t.id === taskId) : job.tasks;
+			if (tasks.length) {
+				for (const t of tasks) out.push((t.url ??= await this.resolveUrl(job, t)));
+			} else if ((job.kind === "magnet" || job.kind === "link") && job.source) {
+				out.push(job.source);
+			}
+		}
+		if (!out.length) return 0;
+		Utils.clipboardWriteText(out.join("\n"));
+		return out.length;
 	}
 
 	freeBytes(): number | null {
