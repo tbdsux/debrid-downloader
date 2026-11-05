@@ -120,6 +120,8 @@ export class DownloadManager {
 	private jobs = new Map<string, Job>();
 	private queue = new PQueue({ concurrency: 3 });
 	private controllers = new Map<string, AbortController>();
+	/** Resolves when a running task has fully stopped (file handles closed). */
+	private settling = new Map<string, Promise<void>>();
 	private busy = new Set<string>();
 	private lastPolled = new Map<string, number>();
 	private limiter = new RateLimiter(0);
@@ -596,6 +598,8 @@ export class DownloadManager {
 		task.error = undefined;
 		const ctrl = new AbortController();
 		this.controllers.set(task.id, ctrl);
+		let settled!: () => void;
+		this.settling.set(task.id, new Promise<void>((r) => (settled = r)));
 		const meter = new SpeedMeter();
 		this.touch(job);
 		try {
@@ -653,6 +657,8 @@ export class DownloadManager {
 			}
 		} finally {
 			this.controllers.delete(task.id);
+			this.settling.delete(task.id);
+			settled();
 			task.speed = 0;
 			this.touch(job);
 			this.onTaskSettled(job);
@@ -720,9 +726,24 @@ export class DownloadManager {
 		job.completedAt = undefined;
 	}
 
+	/** Wait (bounded) for aborted transfers to release their .part files. */
+	private async waitSettled(tasks: FileTask[], timeoutMs = 5000): Promise<void> {
+		const running = tasks.flatMap((t) => this.settling.get(t.id) ?? []);
+		if (!running.length) return;
+		let timer: ReturnType<typeof setTimeout> | undefined;
+		await Promise.race([
+			Promise.all(running),
+			new Promise<void>((r) => (timer = setTimeout(r, timeoutMs))),
+		]);
+		clearTimeout(timer);
+	}
+
 	private async removeJob(job: Job, deleteFiles: boolean): Promise<void> {
 		this.pauseTasks(job.tasks);
 		this.jobs.delete(job.id);
+		this.hooks.removed(job.id);
+		// A transfer that's still unwinding could recreate the .part after we delete it.
+		await this.waitSettled(job.tasks);
 		if (job.kind === "torrent" && job.source && job.stage !== "files") {
 			rmSync(job.source, { force: true });
 		}
@@ -748,7 +769,6 @@ export class DownloadManager {
 				if (t.finalPath && t.status !== "completed") rmSync(`${t.finalPath}.part`, { force: true });
 			}
 		}
-		this.hooks.removed(job.id);
 		scheduleSave(() => this.jobs.values());
 	}
 
