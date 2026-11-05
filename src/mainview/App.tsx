@@ -23,9 +23,7 @@ import { useSettings } from "@/lib/use-settings";
 import { useApplyTheme } from "@/lib/theme";
 import { bytes, speed } from "@/lib/format";
 import { rpc } from "@/lib/rpc";
-
-// Must match the main process: hiddenInset title bar is macOS-only.
-const IS_MAC = navigator.userAgent.includes("Mac");
+import { IS_MAC } from "@/lib/platform";
 
 const NAV_ITEMS = [
 	{ path: "/", label: "Downloads", icon: DownloadIcon },

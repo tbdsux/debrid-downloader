@@ -49,6 +49,7 @@ import { fileToBase64, jobAction, taskAction, useJobs } from "@/lib/use-download
 import { useSettings, NO_ACCOUNTS } from "@/lib/use-settings";
 import { tabFor, useOpenAdd } from "@/lib/add-dialog-context";
 import { errText, rpc } from "@/lib/rpc";
+import { mod, shift } from "@/lib/platform";
 import type { JobAction, JobPublic, JobStatus } from "../../../shared/rpc-schema";
 import { HeaderRow, JobRow, TaskRow } from "./rows";
 
@@ -414,11 +415,11 @@ export default function DownloadsPage() {
 				)}
 				<dl className="mt-auto grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-1 border-t p-3 text-[11px] text-muted-foreground">
 					<dt>
-						<Kbd>Ctrl+N</Kbd>
+						<Kbd>{mod("N")}</Kbd>
 					</dt>
 					<dd>Add downloads</dd>
 					<dt>
-						<Kbd>Ctrl+V</Kbd>
+						<Kbd>{mod("V")}</Kbd>
 					</dt>
 					<dd>Paste magnet / link</dd>
 					<dt>
@@ -454,7 +455,7 @@ export default function DownloadsPage() {
 						tone="primary"
 						icon={<PlusIcon />}
 						label="Add"
-						tip="Add magnet, torrent or links (Ctrl+N)"
+						tip={`Add magnet, torrent or links (${mod("N")})`}
 						onClick={() => openAdd()}
 					/>
 					<ToolSep />
@@ -482,7 +483,7 @@ export default function DownloadsPage() {
 						label="Remove"
 						tone="danger"
 						disabled={!can.remove}
-						tip="Remove from list (Del) — Shift+Del also deletes files"
+						tip={`Remove from list (Del) — ${shift("Del")} also deletes files`}
 						onClick={() => run("remove")}
 					/>
 					<ToolButton
@@ -631,7 +632,7 @@ export default function DownloadsPage() {
 						{selectedJobs.length === 0 ? (
 							<ContextMenuItem onClick={() => openAdd()}>
 								<PlusIcon /> Add downloads…
-								<ContextMenuShortcut>Ctrl+N</ContextMenuShortcut>
+								<ContextMenuShortcut>{mod("N")}</ContextMenuShortcut>
 							</ContextMenuItem>
 						) : (
 							<>
@@ -672,7 +673,7 @@ export default function DownloadsPage() {
 								</ContextMenuItem>
 								<ContextMenuItem variant="destructive" onClick={() => run("removeAndDelete")}>
 									<Trash2Icon /> Remove and delete files
-									<ContextMenuShortcut>⇧Del</ContextMenuShortcut>
+									<ContextMenuShortcut>{shift("Del")}</ContextMenuShortcut>
 								</ContextMenuItem>
 								<ContextMenuItem
 									variant="destructive"
@@ -766,7 +767,7 @@ function EmptyState({
 				<EmptyTitle>No downloads yet</EmptyTitle>
 				<EmptyDescription>
 					{hasAccounts
-						? "Add a magnet, a .torrent file or hoster links. You can also paste with Ctrl+V or drop .torrent files here."
+						? `Add a magnet, a .torrent file or hoster links. You can also paste with ${mod("V")} or drop .torrent files here.`
 						: "Link a debrid account in Settings, then add a magnet, .torrent or link."}
 				</EmptyDescription>
 			</EmptyHeader>
