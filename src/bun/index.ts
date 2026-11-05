@@ -1,5 +1,11 @@
 import "./net-tuning"; // must run before any network call
-import Electrobun, { BrowserWindow, Updater, Utils, defineElectrobunRPC } from "electrobun/main";
+import Electrobun, {
+	BrowserWindow,
+	Screen,
+	Updater,
+	Utils,
+	defineElectrobunRPC,
+} from "electrobun/main";
 import { readFileSync } from "node:fs";
 import { basename } from "node:path";
 import {
@@ -14,6 +20,7 @@ import { cancelAuthFlow, startAuthFlow } from "./accounts/auth-flows";
 import { DownloadManager } from "./downloads/manager";
 import * as cloud from "./cloud";
 import { clipboardCandidate, splitLines } from "./debrid/magnet";
+import { flushFrame, loadFrame, saveFrame } from "./window-state";
 import type { AppRpcSchema, JobPublic } from "../shared/rpc-schema";
 
 // Privileged side of the app: owns settings, account secrets, the download
@@ -164,6 +171,7 @@ const rpc = defineElectrobunRPC<AppRpcSchema, "bun">("bun", {
 			cloudDelete: ({ accountId, torrentIds }) => cloud.remove(accountId, torrentIds),
 			applyUpdate: async () => {
 				manager.flush();
+				flushFrame();
 				await Updater.applyUpdate();
 			},
 		},
@@ -192,22 +200,40 @@ async function getMainViewUrl(): Promise<string> {
 }
 
 await manager.init();
-Electrobun.events.on("before-quit", () => manager.flush());
+Electrobun.events.on("before-quit", () => {
+	manager.flush();
+	flushFrame();
+});
 
 const url = await getMainViewUrl();
 
-void new BrowserWindow({
+function displayWorkAreas() {
+	try {
+		return Screen.getAllDisplays().map((d) => d.workArea);
+	} catch {
+		return [];
+	}
+}
+
+const mainWindow = new BrowserWindow({
 	title: "Debrid Downloader",
 	// macOS: the app header doubles as the title bar (traffic lights inset over it).
 	titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
 	url,
-	frame: {
-		width: 1100,
-		height: 720,
-		x: 160,
-		y: 120,
-	},
+	frame: loadFrame(displayWorkAreas()),
 	rpc,
+});
+// Remember size/position for the next launch.
+let frame = { ...mainWindow.frame };
+mainWindow.on("resize", (e) => {
+	const d = (e as { data: typeof frame }).data;
+	frame = { x: d.x, y: d.y, width: d.width, height: d.height };
+	saveFrame(frame);
+});
+mainWindow.on("move", (e) => {
+	const { x, y } = (e as { data: { x: number; y: number } }).data;
+	frame = { ...frame, x, y };
+	saveFrame(frame);
 });
 
 // Background update: check once on launch, download silently, then let the user pick when to restart.
