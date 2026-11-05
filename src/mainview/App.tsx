@@ -176,6 +176,7 @@ function App() {
 	return (
 		<AddDialogContext.Provider value={openAdd}>
 			<TooltipProvider delay={400}>
+				{/* oxlint-disable-next-line react/hooks -- wouter takes the location hook by reference */}
 				<Router hook={useHashLocation}>
 					<Shell>
 						<Switch>

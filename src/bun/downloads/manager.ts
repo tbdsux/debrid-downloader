@@ -242,6 +242,7 @@ export class DownloadManager {
 		const jobs: Job[] = [];
 		for (const link of inputs) {
 			try {
+				// oxlint-disable-next-line no-new -- validation only
 				new URL(link);
 			} catch {
 				this.hooks.toast("error", "Not a valid link", link.slice(0, 80));

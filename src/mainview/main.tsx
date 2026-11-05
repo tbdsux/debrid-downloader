@@ -7,6 +7,7 @@ import App from "./App";
 import { rpc } from "./lib/rpc";
 
 // Connect to the main process once at startup (never per component).
+// oxlint-disable-next-line no-new -- the instance wires itself to the native bridge
 new Electroview({ rpc });
 
 const queryClient = new QueryClient({

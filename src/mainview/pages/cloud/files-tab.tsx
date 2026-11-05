@@ -38,6 +38,8 @@ export function FilesTab({
 		[q.data, s],
 	);
 
+	// Clear the selection when navigating to another folder.
+	// oxlint-disable-next-line react/exhaustive-effect-dependencies -- folderId is the trigger
 	useEffect(() => setSelected(new Set()), [folderId]);
 	useEffect(() => {
 		const chosen = (q.data?.files ?? []).filter((f) => selected.has(f.id));

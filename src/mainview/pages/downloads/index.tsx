@@ -104,6 +104,7 @@ export default function DownloadsPage() {
 
 	// Newest first, like most download managers.
 	const ordered = useMemo(
+		// oxlint-disable-next-line unicorn/no-array-sort -- sorting a copy; toSorted needs newer system webviews
 		() => [...jobs].sort((a, b) => b.addedAt.localeCompare(a.addedAt)),
 		[jobs],
 	);

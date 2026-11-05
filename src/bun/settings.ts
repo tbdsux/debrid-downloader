@@ -277,6 +277,7 @@ export function toPublic(s: SettingsState): PublicSettings {
 }
 
 /** Test hook: drop the in-memory cache so the next load reads disk. */
+// oxlint-disable-next-line no-underscore-dangle -- underscore marks it test-only
 export function _resetCache(): void {
 	state = undefined;
 	cachedSecret = undefined;

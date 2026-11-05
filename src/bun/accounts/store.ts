@@ -36,9 +36,11 @@ export async function fetchUser(provider: ProviderId, token: string): Promise<Us
 	try {
 		return await makeClient(provider, token, s.advanced.timeoutSec).getUser();
 	} catch (err) {
-		if (isAuthError(err)) throw new Error("The service rejected this key. Check it and try again.");
-		if (isNetworkError(err)) throw new Error(errorMessage(err));
-		throw new Error(`Could not verify the account: ${errorMessage(err)}`);
+		if (isAuthError(err)) {
+			throw new Error("The service rejected this key. Check it and try again.", { cause: err });
+		}
+		if (isNetworkError(err)) throw new Error(errorMessage(err), { cause: err });
+		throw new Error(`Could not verify the account: ${errorMessage(err)}`, { cause: err });
 	}
 }
 
