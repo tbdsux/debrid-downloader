@@ -4,14 +4,16 @@ A desktop app that downloads torrents, magnet links and hoster links through deb
 
 Supported services: **Real-Debrid**, **AllDebrid**, **Premiumize**.
 
-Built with [Electrobun](https://framework.blackboard.sh/electrobun/) (not Electron), React 18, Tailwind CSS v4 and shadcn/ui.
+Built with [Electrobun](https://framework.blackboard.sh/electrobun/) (not Electron), React 19, Tailwind CSS v4 and shadcn/ui.
 
 ## Features
 
 - Add magnets, `.torrent` files and direct/hoster links (Cmd/Ctrl+N)
 - Multiple debrid accounts, signed in with an API key or a device code
 - Browse the torrents, files and history already on your debrid account (Cloud tab)
-- Parallel downloads with progress, speed limit and resume
+- Parallel downloads with progress, speed limit and resume; Pause all / Resume all when nothing is selected
+- macOS: opens `magnet:` links and `.torrent` files (double-click, "Open With", or drag onto the Dock icon) straight into the Add dialog
+- Remembers the window size and position between launches
 - API keys stay in the main process, encrypted at rest, and never reach the UI
 
 ## Screenshots

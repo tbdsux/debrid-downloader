@@ -4,9 +4,9 @@ A desktop app (Electrobun) for downloading torrents, magnets, and direct links v
 
 ## Critical rule: Electrobun is NOT Electron
 
-Never use Electron APIs or patterns (`ipcMain`, `ipcRenderer`, `contextBridge`, `electron` imports, `preload.js` Electron-style). This app uses **Electrobun 2.x**:
+Never use Electron APIs or patterns (`ipcMain`, `ipcRenderer`, `contextBridge`, `electron` imports, `preload.js` Electron-style). This app uses **Electrobun 2.x** (pinned in `hutch.config.ts`; bump with `hutch electrobun update`):
 
-- Main process: `import { BrowserWindow, createRPC, defineElectrobunRPC } from "electrobun/main"` — runs on **Cottontail** (a Zig/JSC runtime with Node/Bun-compatible APIs like `fetch`, `fs`, `Bun.$`).
+- Main process: `import { BrowserWindow, createRPC, defineElectrobunRPC } from "electrobun/main"` — runs on **Cottontail** (a Zig/JSC runtime with Node/Bun-compatible APIs like `fetch`, `fs`, `Bun.$`). Since Electrobun 2.0.4, Bun is the default main process and Cottontail is opt-in; this app opts in explicitly with `build.mainProcess: "cottontail"`, so keep that line. Hutch scripts and `bun test` run on Bun.
 - Webview side: `import { Electroview } from "electrobun/view"` — runs in a native OS webview (no Node APIs, no `require`, browser JS only).
 - Docs: https://framework.blackboard.sh/electrobun/ (guides: quick-start, hello-world, hutch, cottontail)
 
@@ -16,7 +16,7 @@ Never use Electron APIs or patterns (`ipcMain`, `ipcRenderer`, `contextBridge`, 
 src/
   bun/index.ts          # Main process (privileged: windows, network, filesystem, API keys)
   mainview/             # Webview UI (React 18 + Tailwind v4 + shadcn/ui)
-    App.tsx             # Root component
+    App.tsx             # Root component (also receives "open with" magnets/torrents)
     main.tsx            # React entry
     index.html          # Vite root
     index.css           # Tailwind v4 imports + shadcn theme vars + @theme inline mapping
@@ -119,7 +119,7 @@ Notes:
 - **Adding components:** `npx shadcn@latest add <component>` (e.g. `add dialog input table progress`), then run `hutch install` to sync the hutch lockfile (the shadcn CLI installs via npm and leaves a stray `package-lock.json` — delete it).
 - `src/mainview/index.css` contains a hand-maintained `@theme inline` block mapping the `--background`/`--primary`/... CSS vars to Tailwind color utilities (`bg-primary`, `border-border`, ...). If a new component uses a token not in that block, add the mapping there.
 - Dark mode: `.dark` class on `<html>` (vars are defined for `:root` and `.dark` in `index.css`).
-- React 18, `react-jsx` transform, strict TS (`noUnusedLocals`, `noUnusedParameters`, `strict`).
+- React 19, `react-jsx` transform, strict TS (`noUnusedLocals`, `noUnusedParameters`, `strict`).
 - Styling is Tailwind utility classes; use existing shadcn components (`Button`, `Dialog`, `Input`, `Table`, `Progress`, ...) instead of hand-rolling widgets.
 
 ## Routing (wouter)
@@ -133,6 +133,18 @@ Notes:
 - shadcn `Button` does NOT forward refs. Never use it as the `render` of a Base UI trigger (`DropdownMenuTrigger`, `DialogTrigger`, `SelectTrigger`, ...) — the popup needs to anchor to the trigger element and the ref silently fails. Instead style the trigger itself: `<DropdownMenuTrigger className={cn(buttonVariants(), "...")}>`.
 - `onValueChange` on `Select`/`Tabs` receives `string | null` — handle null explicitly.
 - `ProgressValue` render prop is `(formattedValue: string | null, value: number | null)`, not a props object.
+
+## "Open with" and window state
+
+- macOS registers the app for `magnet:` URLs and `.torrent` files (`app.urlSchemes` / `app.fileAssociations` in `electrobun.config.ts`). They arrive as the `open-url` event in `src/bun/index.ts`, are queued in `src/bun/external.ts` (`ExternalInbox`), and the view drains them with `takeExternalAdd` on mount, then receives live `externalAdd` pushes. They only prefill the Add dialog; the user confirms. Electrobun doesn't register these on Windows/Linux yet.
+- The main window frame is saved to `window.json` in the app data dir (`src/bun/window-state.ts`) and validated against the connected displays on launch (`src/bun/window-frame.ts`, pure and unit-tested).
+- Shortcut labels in the UI come from `src/mainview/lib/platform.ts` (`mod("N")` → `⌘N` on macOS, `Ctrl+N` elsewhere); don't hard-code `Ctrl+`.
+
+## Dependency notes
+
+- Stay on TypeScript 6.x for now: the generated `.hutch/devkit/tsconfig.json` uses `baseUrl`, which TypeScript 7 removed.
+- `p-queue` stays on 9.x: 10.x switched to `EventTarget`/`CustomEvent`, which Cottontail isn't guaranteed to provide, and the app only uses `add` + `concurrency`.
+- Pure main-process modules (no `electrobun/main` import) are what `bun test` can load; keep testable logic in files like `window-frame.ts` and `debrid/magnet.ts`.
 
 ## Testing your changes
 
