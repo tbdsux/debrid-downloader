@@ -23,6 +23,11 @@ const PROVIDER_TONE: Record<ProviderId, string> = {
 	"real-debrid": "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 ring-emerald-500/30",
 	"all-debrid": "bg-amber-500/15 text-amber-700 dark:text-amber-300 ring-amber-500/30",
 	premiumize: "bg-sky-500/15 text-sky-700 dark:text-sky-300 ring-sky-500/30",
+	torbox: "bg-violet-500/15 text-violet-700 dark:text-violet-300 ring-violet-500/30",
+	"debrid-link": "bg-rose-500/15 text-rose-700 dark:text-rose-300 ring-rose-500/30",
+	offcloud: "bg-teal-500/15 text-teal-700 dark:text-teal-300 ring-teal-500/30",
+	putio: "bg-orange-500/15 text-orange-700 dark:text-orange-300 ring-orange-500/30",
+	easydebrid: "bg-lime-500/15 text-lime-700 dark:text-lime-300 ring-lime-500/30",
 };
 
 export function ProviderBadge({

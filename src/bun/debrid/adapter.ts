@@ -3,7 +3,18 @@
 // listDownloads (plus RD file selection inside addMagnet). Delete this file
 // once debrid-ts ships them. Everything provider-specific in the app goes
 // through here — callers never branch on provider.
-import { AllDebrid, DebridError, Premiumize, RealDebrid, type Torrent } from "debrid-ts";
+import {
+	AllDebrid,
+	DebridError,
+	DebridLink,
+	EasyDebrid,
+	Offcloud,
+	Premiumize,
+	Putio,
+	RealDebrid,
+	TorBox,
+	type Torrent,
+} from "debrid-ts";
 import type { AnyClient } from "../accounts/clients";
 import type { CloudFolder, CloudLink } from "../../shared/rpc-schema";
 
@@ -23,6 +34,21 @@ export type RemoteFile = {
 
 export type Unrestricted = { url: string; filename: string; bytes: number };
 
+/** shortcut: these services add hoster links as async transfers, which the link flow can't wait on; add polling if users want hoster links there. */
+function linksUnsupported(): DebridError {
+	return new DebridError(
+		"This service can't resolve direct links here. Add a magnet or .torrent instead.",
+		400,
+	);
+}
+
+function torrentFilesUnsupported(): DebridError {
+	return new DebridError(
+		"This service doesn't accept .torrent files. Use the magnet link instead.",
+		400,
+	);
+}
+
 export async function addMagnet(client: AnyClient, magnet: string): Promise<Torrent> {
 	return client.addMagnet(magnet);
 }
@@ -40,6 +66,11 @@ export async function addTorrentFile(
 		if (added.error) throw new DebridError(added.error.message, 200, added.error.code);
 		return String(added.id);
 	}
+	if (client instanceof TorBox || client instanceof Putio) {
+		return client.addTorrentFile(file, filename);
+	}
+	if (client instanceof DebridLink) return (await client.addTorrentFile(file, filename)).id;
+	if (client instanceof Offcloud || client instanceof EasyDebrid) throw torrentFilesUnsupported();
 	const created = await client.createTransferFile(file, { filename });
 	if ("type" in created) throw new DebridError("Container files are not supported", 200);
 	return created.id;
@@ -68,10 +99,19 @@ export async function startTorrent(
 }
 
 export async function deleteTorrent(client: AnyClient, id: string): Promise<void> {
+	if (client instanceof EasyDebrid) return; // nothing is stored on the account
 	if (client instanceof RealDebrid) return client.deleteTorrent(id);
 	if (client instanceof AllDebrid) {
 		await client.deleteMagnet(Number(id));
 		return;
+	}
+	if (
+		client instanceof TorBox ||
+		client instanceof DebridLink ||
+		client instanceof Offcloud ||
+		client instanceof Putio
+	) {
+		return client.deleteTorrent(id);
 	}
 	await client.deleteTransfer(id);
 }
@@ -122,6 +162,28 @@ export async function listFiles(client: AnyClient, torrentId: string): Promise<R
 		}
 		return flattenAd(entry.files ?? []);
 	}
+	if (client instanceof TorBox) {
+		// Links are requested per file when the download starts: `torrentId:fileId`.
+		const t = await client.getTorrent(torrentId);
+		return (t.files ?? []).map((f) => ({
+			key: String(f.id),
+			path: f.path,
+			bytes: f.bytes,
+			link: `${torrentId}:${f.id}`,
+			direct: false,
+		}));
+	}
+	if (client instanceof Putio) {
+		// Links are requested per file when the download starts: the link is the file id.
+		const files = await client.listTransferFiles(torrentId);
+		return files.map((f) => ({
+			key: String(f.id),
+			path: f.path,
+			bytes: f.size,
+			link: String(f.id),
+			direct: false,
+		}));
+	}
 	const links = await client.getDownloadLinks(torrentId);
 	return links.map((l) => ({
 		key: l.id,
@@ -146,6 +208,20 @@ export async function unrestrict(client: AnyClient, link: string): Promise<Unres
 		if (!url) throw new DebridError("Link could not be unlocked", 200);
 		return { url, filename: r.filename, bytes: r.filesize };
 	}
+	if (client instanceof TorBox) {
+		const [torrentId, fileId] = link.split(":");
+		const url = await client.requestDownloadLink(torrentId!, Number(fileId));
+		return { url, filename: "", bytes: 0 };
+	}
+	if (client instanceof DebridLink) {
+		const first = (await client.unrestrictLink(link))[0];
+		if (!first) throw new DebridError("No link returned", 200);
+		return { url: first.downloadUrl, filename: first.name, bytes: first.size };
+	}
+	if (client instanceof Putio) {
+		return { url: await client.getFileUrl(Number(link)), filename: "", bytes: 0 };
+	}
+	if (client instanceof Offcloud || client instanceof EasyDebrid) throw linksUnsupported();
 	const dl = await client.getDirectDownloadLinks(link);
 	const first = dl.content[0];
 	if (!first) throw new DebridError("No files for this link", 200);
@@ -170,6 +246,24 @@ export async function resolveLink(client: AnyClient, link: string): Promise<Remo
 			link: c.link,
 			direct: true,
 		}));
+	}
+	if (client instanceof DebridLink) {
+		const links = await client.unrestrictLink(link);
+		return links.map((l) => ({
+			key: l.id,
+			path: l.name,
+			bytes: l.size,
+			link: l.downloadUrl,
+			direct: true,
+		}));
+	}
+	if (
+		client instanceof TorBox ||
+		client instanceof Offcloud ||
+		client instanceof Putio ||
+		client instanceof EasyDebrid
+	) {
+		throw linksUnsupported();
 	}
 	const u = await unrestrict(client, link);
 	return [{ key: "0", path: u.filename, bytes: u.bytes, link: u.url, direct: true }];

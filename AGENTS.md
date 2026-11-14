@@ -1,6 +1,6 @@
 # AGENTS.md — Guide for LLMs working on this project
 
-A desktop app (Electrobun) for downloading torrents, magnets, and direct links via debrid services (Real-Debrid, AllDebrid, TorBox, Premiumize, etc.) and saving the files locally.
+A desktop app (Electrobun) for downloading torrents, magnets, and direct links via debrid services (Real-Debrid, AllDebrid, Premiumize, TorBox, Debrid-Link, Offcloud, put.io, EasyDebrid) and saving the files locally.
 
 ## Critical rule: Electrobun is NOT Electron
 

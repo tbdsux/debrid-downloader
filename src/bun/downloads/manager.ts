@@ -394,8 +394,8 @@ export class DownloadManager {
 					job.targetDir = job.dir;
 					job.tasks = files.map((f) => {
 						// RD/AD: keep the hoster link so an expired URL can be re-unrestricted;
-						// PM links are direct and get re-listed from the source instead.
-						const direct = job.provider === "premiumize";
+						// PM/DL may expand to several files, so they get re-listed from the source.
+						const direct = job.provider === "premiumize" || job.provider === "debrid-link";
 						const t = this.newTask(
 							f.key,
 							safeFileName(basename(f.path)),

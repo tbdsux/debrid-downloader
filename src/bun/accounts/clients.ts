@@ -1,7 +1,17 @@
 // accountId → debrid-ts client. Instances are cached per account and rebuilt
 // when the secret changes (token refresh, key edit). OAuth access tokens are
 // refreshed shortly before expiry; bad tokens mark the account invalid.
-import { AllDebrid, DebridError, Premiumize, RealDebrid } from "debrid-ts";
+import {
+	AllDebrid,
+	DebridError,
+	DebridLink,
+	EasyDebrid,
+	Offcloud,
+	Premiumize,
+	Putio,
+	RealDebrid,
+	TorBox,
+} from "debrid-ts";
 import {
 	loadSettings,
 	setAccountStatus,
@@ -11,7 +21,15 @@ import {
 } from "../settings";
 import type { ProviderId } from "../../shared/rpc-schema";
 
-export type AnyClient = RealDebrid | AllDebrid | Premiumize;
+export type AnyClient =
+	| RealDebrid
+	| AllDebrid
+	| Premiumize
+	| TorBox
+	| DebridLink
+	| Offcloud
+	| Putio
+	| EasyDebrid;
 
 type Cached = { client: AnyClient; token: string };
 const cache = new Map<string, Cached>();
@@ -25,6 +43,16 @@ export function makeClient(provider: ProviderId, token: string, timeoutSec = 30)
 			return new AllDebrid(token, opts);
 		case "premiumize":
 			return new Premiumize(token, opts);
+		case "torbox":
+			return new TorBox(token, opts);
+		case "debrid-link":
+			return new DebridLink(token, opts);
+		case "offcloud":
+			return new Offcloud(token, opts);
+		case "putio":
+			return new Putio(token, opts);
+		case "easydebrid":
+			return new EasyDebrid(token, opts);
 	}
 }
 
@@ -86,6 +114,10 @@ export function dropClient(accountId: string): void {
 
 const AUTH_CODES = new Set([
 	"bad_token",
+	"BAD_TOKEN",
+	"NO_AUTH",
+	"AUTH_ERROR",
+	"badToken",
 	"AUTH_BAD_APIKEY",
 	"AUTH_MISSING_APIKEY",
 	"AUTH_USER_BANNED",
