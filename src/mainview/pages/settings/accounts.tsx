@@ -118,7 +118,7 @@ export default function AccountsSection() {
 							Paste an API key from Real-Debrid, AllDebrid or Premiumize to get started.
 						</EmptyDescription>
 					</EmptyHeader>
-					<EmptyContent className="flex-row justify-center">
+					<EmptyContent className="max-w-xl flex-row flex-wrap justify-center">
 						{PROVIDER_IDS.map((p) => (
 							<Button key={p} size="sm" variant="outline" onClick={() => setAdding(p)}>
 								<ProviderBadge provider={p} /> {PROVIDERS[p].name}
