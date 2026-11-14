@@ -179,6 +179,11 @@ const rpc = defineElectrobunRPC<AppRpcSchema, "bun">("bun", {
 				flushFrame();
 				await Updater.applyUpdate();
 			},
+			toggleMaximize: () => {
+				if (!mainWindow) return;
+				if (mainWindow.isMaximized()) mainWindow.unmaximize();
+				else mainWindow.maximize();
+			},
 		},
 		messages: {},
 	},

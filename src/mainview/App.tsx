@@ -130,6 +130,10 @@ function Shell({ children }: { children: ReactNode }) {
 					"electrobun-webkit-app-region-drag flex h-10 shrink-0 items-stretch border-b bg-chrome pr-2 select-none",
 					IS_MAC ? "pl-[78px]" : "pl-3",
 				)}
+				onDoubleClick={(e) => {
+					if (!(e.target as Element).closest(".electrobun-webkit-app-region-no-drag"))
+						void rpc.request.toggleMaximize();
+				}}
 			>
 				<div className="mr-2 flex items-center pr-1">
 					<span className="flex size-5 items-center justify-center rounded-md bg-primary text-primary-foreground">

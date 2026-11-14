@@ -343,6 +343,8 @@ export interface AppRpcSchema extends ElectrobunRPCSchema {
 			takeExternalAdd: { params: undefined; response: ExternalAdd | null };
 			// restarts the app into the downloaded update (after updateReady)
 			applyUpdate: { params: undefined; response: void };
+			// title-bar double-click (the custom header has no native title bar to zoom it)
+			toggleMaximize: { params: undefined; response: void };
 		};
 		messages: {};
 	};
