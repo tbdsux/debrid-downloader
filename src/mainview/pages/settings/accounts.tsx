@@ -115,7 +115,7 @@ export default function AccountsSection() {
 						</EmptyMedia>
 						<EmptyTitle>No accounts linked</EmptyTitle>
 						<EmptyDescription>
-							Paste an API key from Real-Debrid, AllDebrid or Premiumize to get started.
+							Add an account from one of the supported services below to get started.
 						</EmptyDescription>
 					</EmptyHeader>
 					<EmptyContent className="max-w-xl flex-row flex-wrap justify-center">
